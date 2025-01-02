@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "AFCU Budget",
+    "version": "1.0",
+    "description": "Adds functionality to copy transactions from AFCU to the clipboard",
+    "icons": {
+        "16": "icons/financial-16.png",
+        "32": "icons/financial-32.png",
+        "128": "icons/financial-128.png"
+      },
+    "content_scripts": [
+        {
+            "js": ["scripts/content.js"],
+            "matches": [
+                "https://webaccess45.americafirst.com/banking/Accounts/Details/Index/*"
+            ]
+        }
+    ],
+    "permissions": [
+        "clipboardWrite"
+    ]
+  }
