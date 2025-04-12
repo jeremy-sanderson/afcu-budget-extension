@@ -1,0 +1,13 @@
+'use strict';
+
+// ========================
+// THIRD-PARTY LIBRARIES
+// ========================
+/**
+ * Minified by jsDelivr using Terser v5.37.0.
+ * Original file: /npm/prompts-js@0.0.4/index.js
+ * https://github.com/simonw/prompts-js
+ *
+ * Do NOT use SRI with dynamically generated files! More information: https://www.jsdelivr.com/using-sri-with-dynamic-files
+ */
+const Prompts=function(){const e={border:"none",borderRadius:"6px",padding:"20px",minWidth:"300px",maxWidth:"80%",boxSizing:"border-box",fontFamily:"sans-serif",boxShadow:"0 2px 10px rgba(0,0,0,0.2)",background:"#fff"},n={marginBottom:"20px",fontSize:"16px",color:"#333",whiteSpace:"pre-wrap",wordWrap:"break-word"},o={textAlign:"right",marginTop:"20px"},t={backgroundColor: colors.menuButtonBackgroundColor,color:"#fff",border:"none",borderRadius:"4px",padding:"8px 12px",fontSize:"14px",cursor:"pointer",marginLeft:"8px"},d={backgroundColor:"#6c757d"},r={width:"100%",boxSizing:"border-box",padding:"8px",fontSize:"16px",marginBottom:"20px",borderRadius:"4px",border:"1px solid #ccc"};function a(e,n){Object.assign(e.style,n)}function i(o){const t=document.createElement("dialog");a(t,e),t.setAttribute("role","dialog"),t.setAttribute("aria-modal","true");const d=document.createElement("form");d.method="dialog";const r=document.createElement("div");return a(r,n),r.textContent=o,d.appendChild(r),t.appendChild(d),{dialog:t,form:d}}function c(e,n,o={},d="submit"){const r=document.createElement("button");return a(r,t),a(r,o),r.type=d,r.value=n,r.textContent=e,r}return{alert:async function(e){return new Promise((n=>{const{dialog:t,form:d}=i(e),r=document.createElement("div");a(r,o);const p=c("OK","ok");r.appendChild(p),d.appendChild(r),t.addEventListener("close",(()=>{n(),t.remove()})),document.body.appendChild(t),t.showModal(),p.focus()}))},confirm:async function(e){return new Promise((n=>{const{dialog:t,form:r}=i(e),p=document.createElement("div");a(p,o);const l=c("Cancel","cancel",d),s=c("OK","ok");p.appendChild(l),p.appendChild(s),r.appendChild(p),t.addEventListener("close",(()=>{const e=t.returnValue;n("ok"===e),t.remove()})),document.body.appendChild(t),t.showModal(),s.focus()}))},prompt:async function(e){return new Promise((n=>{const{dialog:t,form:p}=i(e),l=document.createElement("input");a(l,r),l.type="text",l.name="promptInput",p.appendChild(l);const s=document.createElement("div");a(s,o);const u=c("Cancel","cancel",d,"button"),m=c("OK","ok");s.appendChild(u),s.appendChild(m),p.appendChild(s),u.addEventListener("click",(()=>{t.close(null)})),t.addEventListener("close",(()=>{const e="ok"===t.returnValue?l.value:null;n(e),t.remove()})),document.body.appendChild(t),t.showModal(),l.focus()}))}}}();

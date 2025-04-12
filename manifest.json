@@ -10,7 +10,14 @@
       },
     "content_scripts": [
         {
-            "js": ["scripts/content.js"],
+            "js": [
+                "scripts/config.js",
+                "scripts/prompts.js",
+                "scripts/ui.js",
+                "scripts/data.js",
+                "scripts/features.js",
+                "scripts/init.js"
+            ],
             "matches": [
                 "https://webaccess45.americafirst.com/banking/Accounts/Details/Index/*"
             ]
