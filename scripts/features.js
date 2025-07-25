@@ -53,16 +53,15 @@ function filterDebitsByDate(filterDate) {
     try {
         const transactions = gatherDebitTransactionsInViewSortedByDate()
             .filter(transaction => Date.parse(transaction.date) >= filterDate)
-            .map(t => convertTransactionToTSV(t))
-            .join('\n');
+            .map(t => convertTransactionToTSV(t));
             
         if (!transactions) {
             Prompts.alert("No transactions found for the selected date range.");
             return;
         }
         
-        navigator.clipboard.writeText(transactions)
-            .then(() => Prompts.alert("Transactions copied to clipboard"))
+        navigator.clipboard.writeText(transactions.join('\n'))
+            .then(() => Prompts.alert(`${transactions.length} transactions copied to clipboard`))
             .catch(error => {
                 console.error('Error copying to clipboard:', error);
                 Prompts.alert("Error copying to clipboard. Please try again.");
