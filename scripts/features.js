@@ -75,6 +75,26 @@ function filterDebitsByDate(filterDate) {
 /**
  * Feature to copy the available balance
  */
+function currentBalance() {
+    try {
+        const balance = getCurrentBalance();
+        if (balance) {
+            navigator.clipboard.writeText(balance)
+                .then(() => Prompts.alert("Current balance copied to clipboard"))
+                .catch(error => {
+                    console.error('Error copying current balance to clipboard:', error);
+                    Prompts.alert("Error copying current balance. Please try again.");
+                });
+        }
+    } catch (error) {
+        console.error('Error with current balance:', error);
+        Prompts.alert('Error retrieving current balance. Please try again.');
+    }
+}
+
+/**
+ * Feature to copy the available balance
+ */
 function availableBalance() {
     try {
         const balance = getAvailableBalance();
@@ -82,13 +102,13 @@ function availableBalance() {
             navigator.clipboard.writeText(balance)
                 .then(() => Prompts.alert("Available balance copied to clipboard"))
                 .catch(error => {
-                    console.error('Error copying balance to clipboard:', error);
-                    Prompts.alert("Error copying balance. Please try again.");
+                    console.error('Error copying available balance to clipboard:', error);
+                    Prompts.alert("Error copying available balance. Please try again.");
                 });
         }
     } catch (error) {
         console.error('Error with available balance:', error);
-        Prompts.alert('Error retrieving balance. Please try again.');
+        Prompts.alert('Error retrieving available balance. Please try again.');
     }
 }
 

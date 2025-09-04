@@ -47,7 +47,8 @@ function initBudgetingFeatures() {
         createMenuItem(dropdownMenu, 'Debits from Yesterday', debitTransactionsFromYesterday);
         createMenuItem(dropdownMenu, 'Debits from Today', debitTransactionsFromToday);
         createMenuItem(dropdownMenu, 'Debits from Date', debitTransactionsWithDate);
-        createMenuItem(dropdownMenu, 'Balance', availableBalance);
+        createMenuItem(dropdownMenu, 'Current Balance', currentBalance);
+        createMenuItem(dropdownMenu, 'Available Balance', availableBalance);
         
         // Setup transaction links and event listeners
         delayedIndividualDebitTransactionLinks();

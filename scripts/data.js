@@ -69,9 +69,9 @@ function gatherDebitTransactionsInViewSortedByDate() {
 }
 
 /**
- * Gets the available balance from the account details section
+ * Gets the current balance from the account details section
  */
-function getAvailableBalance() {
+function getCurrentBalance() {
     try {
         const accountDetails = document.querySelector("div.account-details");
         if (!accountDetails) {
@@ -79,17 +79,36 @@ function getAvailableBalance() {
         }
         
         const balanceRow = [...accountDetails.querySelectorAll(".row")].find(
-            row => row.querySelector(".detail-label-col span")?.innerText.includes('Available Balance')
+            row => row.querySelector(".detail-label-col span")?.innerText.includes('Balance')
         );
         
         if (!balanceRow) {
-            throw new Error('Available balance not found');
+            throw new Error('Current balance not found');
         }
         
         return balanceRow.querySelector(".detail-item-col span").innerText.replace("$", "").replace(",", "");
+    } catch (error) {
+        console.error('Error getting current balance:', error);
+        Prompts.alert(`Error: ${error.message}`);
+        return null;
+    }
+}
+
+/**
+ * Gets the available balance from the account details section
+ */
+function getAvailableBalance() {
+    try {
+        const availableBalance = document.querySelector(".primary-label-amount");
+        if (!availableBalance) {
+            throw new Error('Available balance not found');
+        }
+
+        return availableBalance.title.replace('$', '').replace(',','');
     } catch (error) {
         console.error('Error getting available balance:', error);
         Prompts.alert(`Error: ${error.message}`);
         return null;
     }
 }
+
