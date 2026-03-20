@@ -23,10 +23,7 @@ export default function App() {
         <>
             <BudgetMenu items={menuItems} />
             {dialog.dialogState.type === 'alert' && (
-                <AlertDialog
-                    message={dialog.dialogState.message}
-                    onClose={dialog.close}
-                />
+                <AlertDialog message={dialog.dialogState.message} onClose={dialog.close} />
             )}
             {dialog.dialogState.type === 'confirm' && (
                 <ConfirmDialog

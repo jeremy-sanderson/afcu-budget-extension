@@ -1,57 +1,31 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ConfirmDialog from './ConfirmDialog';
 
-beforeEach(() => {
-    HTMLDialogElement.prototype.showModal = vi.fn();
-    HTMLDialogElement.prototype.close = vi.fn();
-});
-
 describe('ConfirmDialog', () => {
-    it('renders message and both buttons when open', () => {
-        render(
-            <ConfirmDialog
-                message="Are you sure?"
-                open={true}
-                onConfirm={() => {}}
-                onCancel={() => {}}
-            />,
-        );
+    it('renders message and both buttons', () => {
+        render(<ConfirmDialog message="Are you sure?" onConfirm={() => {}} onCancel={() => {}} />);
         expect(screen.getByText('Are you sure?')).toBeInTheDocument();
         expect(screen.getByText('OK')).toBeInTheDocument();
         expect(screen.getByText('Cancel')).toBeInTheDocument();
     });
 
-    it('calls onClose handler when OK is clicked', async () => {
+    it('calls onConfirm when OK is clicked', async () => {
         const user = userEvent.setup();
         const onConfirm = vi.fn();
-        const onCancel = vi.fn();
-        render(
-            <ConfirmDialog
-                message="Confirm?"
-                open={true}
-                onConfirm={onConfirm}
-                onCancel={onCancel}
-            />,
-        );
+        render(<ConfirmDialog message="Confirm?" onConfirm={onConfirm} onCancel={() => {}} />);
 
         await user.click(screen.getByText('OK'));
-        // The dialog's onClose event fires, which checks returnValue
+        expect(onConfirm).toHaveBeenCalled();
     });
 
-    it('calls onClose handler when Cancel is clicked', async () => {
+    it('calls onCancel when Cancel is clicked', async () => {
         const user = userEvent.setup();
         const onCancel = vi.fn();
-        render(
-            <ConfirmDialog
-                message="Confirm?"
-                open={true}
-                onConfirm={() => {}}
-                onCancel={onCancel}
-            />,
-        );
+        render(<ConfirmDialog message="Confirm?" onConfirm={() => {}} onCancel={onCancel} />);
 
         await user.click(screen.getByText('Cancel'));
+        expect(onCancel).toHaveBeenCalled();
     });
 });

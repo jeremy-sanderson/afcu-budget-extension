@@ -17,10 +17,7 @@ describe('BudgetMenu', () => {
 
     it('dropdown is hidden by default', () => {
         render(<BudgetMenu items={mockItems} />);
-        expect(screen.getByRole('menu', { hidden: true })).toHaveAttribute(
-            'data-state',
-            'closed',
-        );
+        expect(screen.getByRole('menu', { hidden: true })).toHaveAttribute('data-state', 'closed');
     });
 
     it('dropdown appears on button click', async () => {
@@ -42,10 +39,7 @@ describe('BudgetMenu', () => {
         expect(screen.getByRole('menu')).toHaveAttribute('data-state', 'open');
 
         await user.click(screen.getByText('Budgeting'));
-        expect(screen.getByRole('menu', { hidden: true })).toHaveAttribute(
-            'data-state',
-            'closed',
-        );
+        expect(screen.getByRole('menu', { hidden: true })).toHaveAttribute('data-state', 'closed');
     });
 
     it('menu items render with correct text', async () => {

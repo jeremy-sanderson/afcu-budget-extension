@@ -38,19 +38,13 @@ export default function useDialog(): DialogAPI {
         setDialogState({ type: 'alert', message });
     }, []);
 
-    const showConfirm = useCallback(
-        (message: string, onResult: (confirmed: boolean) => void) => {
-            setDialogState({ type: 'confirm', message, onResult });
-        },
-        [],
-    );
+    const showConfirm = useCallback((message: string, onResult: (confirmed: boolean) => void) => {
+        setDialogState({ type: 'confirm', message, onResult });
+    }, []);
 
-    const showPrompt = useCallback(
-        (message: string, onResult: (value: string | null) => void) => {
-            setDialogState({ type: 'prompt', message, onResult });
-        },
-        [],
-    );
+    const showPrompt = useCallback((message: string, onResult: (value: string | null) => void) => {
+        setDialogState({ type: 'prompt', message, onResult });
+    }, []);
 
     const close = useCallback(() => {
         setDialogState({ type: null });
