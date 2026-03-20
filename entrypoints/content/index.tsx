@@ -1,5 +1,6 @@
 import './style.css';
 import ReactDOM from 'react-dom/client';
+import { EnvironmentProvider } from '@ark-ui/react';
 import App from './App';
 
 export default defineContentScript({
@@ -15,7 +16,12 @@ export default defineContentScript({
                 const wrapper = document.createElement('div');
                 container.append(wrapper);
                 const root = ReactDOM.createRoot(wrapper);
-                root.render(<App />);
+                const shadowRoot = container.getRootNode() as ShadowRoot;
+                root.render(
+                    <EnvironmentProvider value={() => shadowRoot}>
+                        <App />
+                    </EnvironmentProvider>,
+                );
                 return root;
             },
             onRemove(root) {

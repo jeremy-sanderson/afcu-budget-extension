@@ -23,26 +23,40 @@ export default function App() {
         <>
             <BudgetMenu items={menuItems} />
             {dialog.dialogState.type === 'alert' && (
-                <AlertDialog
-                    message={dialog.dialogState.message}
-                    open={true}
-                    onClose={dialog.closeDialog}
-                />
+                <AlertDialog message={dialog.dialogState.message} onClose={dialog.close} />
             )}
             {dialog.dialogState.type === 'confirm' && (
                 <ConfirmDialog
                     message={dialog.dialogState.message}
-                    open={true}
-                    onConfirm={() => dialog.resolveDialog(true)}
-                    onCancel={() => dialog.resolveDialog(false)}
+                    onConfirm={() => {
+                        if (dialog.dialogState.type === 'confirm') {
+                            dialog.dialogState.onResult(true);
+                        }
+                        dialog.close();
+                    }}
+                    onCancel={() => {
+                        if (dialog.dialogState.type === 'confirm') {
+                            dialog.dialogState.onResult(false);
+                        }
+                        dialog.close();
+                    }}
                 />
             )}
             {dialog.dialogState.type === 'prompt' && (
                 <PromptDialog
                     message={dialog.dialogState.message}
-                    open={true}
-                    onSubmit={(value) => dialog.resolveDialog(value)}
-                    onCancel={() => dialog.resolveDialog(null)}
+                    onSubmit={(value) => {
+                        if (dialog.dialogState.type === 'prompt') {
+                            dialog.dialogState.onResult(value);
+                        }
+                        dialog.close();
+                    }}
+                    onCancel={() => {
+                        if (dialog.dialogState.type === 'prompt') {
+                            dialog.dialogState.onResult(null);
+                        }
+                        dialog.close();
+                    }}
                 />
             )}
         </>

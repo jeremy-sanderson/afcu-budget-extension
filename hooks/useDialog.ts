@@ -1,60 +1,54 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 
-type DialogValue = void | boolean | string | null;
-
-interface DialogState {
-    type: 'alert' | 'confirm' | 'prompt' | null;
+interface AlertState {
+    type: 'alert';
     message: string;
 }
 
+interface ConfirmState {
+    type: 'confirm';
+    message: string;
+    onResult: (confirmed: boolean) => void;
+}
+
+interface PromptState {
+    type: 'prompt';
+    message: string;
+    onResult: (value: string | null) => void;
+}
+
+interface ClosedState {
+    type: null;
+}
+
+type DialogState = AlertState | ConfirmState | PromptState | ClosedState;
+
 export interface DialogAPI {
     dialogState: DialogState;
-    alert: (message: string) => Promise<void>;
-    confirm: (message: string) => Promise<boolean>;
-    prompt: (message: string) => Promise<string | null>;
-    closeDialog: () => void;
-    resolveDialog: (value: DialogValue) => void;
+    showAlert: (message: string) => void;
+    showConfirm: (message: string, onResult: (confirmed: boolean) => void) => void;
+    showPrompt: (message: string, onResult: (value: string | null) => void) => void;
+    close: () => void;
 }
 
 export default function useDialog(): DialogAPI {
-    const [dialogState, setDialogState] = useState<DialogState>({
-        type: null,
-        message: '',
-    });
-    const resolveRef = useRef<((value: DialogValue) => void) | null>(null);
+    const [dialogState, setDialogState] = useState<DialogState>({ type: null });
 
-    const alert = useCallback((message: string): Promise<void> => {
-        return new Promise((resolve) => {
-            resolveRef.current = resolve as (value: DialogValue) => void;
-            setDialogState({ type: 'alert', message });
-        });
+    const showAlert = useCallback((message: string) => {
+        setDialogState({ type: 'alert', message });
     }, []);
 
-    const confirm = useCallback((message: string): Promise<boolean> => {
-        return new Promise((resolve) => {
-            resolveRef.current = resolve as (value: DialogValue) => void;
-            setDialogState({ type: 'confirm', message });
-        });
+    const showConfirm = useCallback((message: string, onResult: (confirmed: boolean) => void) => {
+        setDialogState({ type: 'confirm', message, onResult });
     }, []);
 
-    const prompt = useCallback((message: string): Promise<string | null> => {
-        return new Promise((resolve) => {
-            resolveRef.current = resolve as (value: DialogValue) => void;
-            setDialogState({ type: 'prompt', message });
-        });
+    const showPrompt = useCallback((message: string, onResult: (value: string | null) => void) => {
+        setDialogState({ type: 'prompt', message, onResult });
     }, []);
 
-    const closeDialog = useCallback(() => {
-        resolveRef.current?.(undefined);
-        resolveRef.current = null;
-        setDialogState({ type: null, message: '' });
+    const close = useCallback(() => {
+        setDialogState({ type: null });
     }, []);
 
-    const resolveDialog = useCallback((value: DialogValue) => {
-        resolveRef.current?.(value);
-        resolveRef.current = null;
-        setDialogState({ type: null, message: '' });
-    }, []);
-
-    return { dialogState, alert, confirm, prompt, closeDialog, resolveDialog };
+    return { dialogState, showAlert, showConfirm, showPrompt, close };
 }

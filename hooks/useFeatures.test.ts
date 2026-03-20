@@ -13,12 +13,11 @@ vi.mock('../utils/data', () => ({
 
 function createMockDialog(): DialogAPI {
     return {
-        dialogState: { type: null, message: '' },
-        alert: vi.fn().mockResolvedValue(undefined),
-        confirm: vi.fn().mockResolvedValue(true),
-        prompt: vi.fn().mockResolvedValue(''),
-        closeDialog: vi.fn(),
-        resolveDialog: vi.fn(),
+        dialogState: { type: null },
+        showAlert: vi.fn(),
+        showConfirm: vi.fn(),
+        showPrompt: vi.fn(),
+        close: vi.fn(),
     };
 }
 
@@ -32,6 +31,10 @@ beforeEach(() => {
         configurable: true,
     });
 });
+
+async function flushMicrotasks() {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+}
 
 describe('useFeatures', () => {
     describe('debitTransactionsFromYesterday', () => {
@@ -47,10 +50,11 @@ describe('useFeatures', () => {
             vi.mocked(data.convertTransactionToTSV).mockReturnValue('tsv-line');
 
             const { result } = renderHook(() => useFeatures(mockDialog));
-            await act(() => result.current.debitTransactionsFromYesterday());
+            act(() => result.current.debitTransactionsFromYesterday());
+            await flushMicrotasks();
 
             expect(mockWriteText).toHaveBeenCalledWith('tsv-line');
-            expect(mockDialog.alert).toHaveBeenCalledWith('1 transactions copied to clipboard');
+            expect(mockDialog.showAlert).toHaveBeenCalledWith('1 transactions copied to clipboard');
         });
     });
 
@@ -65,17 +69,20 @@ describe('useFeatures', () => {
             vi.mocked(data.convertTransactionToTSV).mockReturnValue('today-tsv');
 
             const { result } = renderHook(() => useFeatures(mockDialog));
-            await act(() => result.current.debitTransactionsFromToday());
+            act(() => result.current.debitTransactionsFromToday());
+            await flushMicrotasks();
 
             expect(mockWriteText).toHaveBeenCalledWith('today-tsv');
-            expect(mockDialog.alert).toHaveBeenCalledWith('1 transactions copied to clipboard');
+            expect(mockDialog.showAlert).toHaveBeenCalledWith('1 transactions copied to clipboard');
         });
     });
 
     describe('debitTransactionsWithDate', () => {
         it('prompts for date input and filters accordingly', async () => {
             const mockDialog = createMockDialog();
-            vi.mocked(mockDialog.prompt).mockResolvedValue('4/9/2025');
+            vi.mocked(mockDialog.showPrompt).mockImplementation((_msg, onResult) => {
+                onResult('4/9/2025');
+            });
 
             vi.mocked(data.gatherDebitTransactionsInViewSortedByDate).mockReturnValue([
                 { date: '4/9/2025', description: 'GOOGLE', amount: 10 },
@@ -84,15 +91,21 @@ describe('useFeatures', () => {
             vi.mocked(data.convertTransactionToTSV).mockReturnValue('tsv');
 
             const { result } = renderHook(() => useFeatures(mockDialog));
-            await act(() => result.current.debitTransactionsWithDate());
+            act(() => result.current.debitTransactionsWithDate());
+            await flushMicrotasks();
 
-            expect(mockDialog.prompt).toHaveBeenCalledWith('Enter start date (blank for today)');
+            expect(mockDialog.showPrompt).toHaveBeenCalledWith(
+                'Enter start date (blank for today)',
+                expect.any(Function),
+            );
             expect(mockWriteText).toHaveBeenCalled();
         });
 
         it('defaults to today when blank input', async () => {
             const mockDialog = createMockDialog();
-            vi.mocked(mockDialog.prompt).mockResolvedValue('');
+            vi.mocked(mockDialog.showPrompt).mockImplementation((_msg, onResult) => {
+                onResult('');
+            });
 
             const today = new Date().toLocaleDateString();
             vi.mocked(data.gatherDebitTransactionsInViewSortedByDate).mockReturnValue([
@@ -101,7 +114,8 @@ describe('useFeatures', () => {
             vi.mocked(data.convertTransactionToTSV).mockReturnValue('tsv');
 
             const { result } = renderHook(() => useFeatures(mockDialog));
-            await act(() => result.current.debitTransactionsWithDate());
+            act(() => result.current.debitTransactionsWithDate());
+            await flushMicrotasks();
 
             expect(mockWriteText).toHaveBeenCalled();
         });
@@ -113,10 +127,13 @@ describe('useFeatures', () => {
             vi.mocked(data.getCurrentBalance).mockReturnValue('36.00');
 
             const { result } = renderHook(() => useFeatures(mockDialog));
-            await act(() => result.current.copyCurrentBalance());
+            act(() => result.current.copyCurrentBalance());
+            await flushMicrotasks();
 
             expect(mockWriteText).toHaveBeenCalledWith('36.00');
-            expect(mockDialog.alert).toHaveBeenCalledWith('Current balance copied to clipboard');
+            expect(mockDialog.showAlert).toHaveBeenCalledWith(
+                'Current balance copied to clipboard',
+            );
         });
     });
 
@@ -126,10 +143,13 @@ describe('useFeatures', () => {
             vi.mocked(data.getAvailableBalance).mockReturnValue('36.00');
 
             const { result } = renderHook(() => useFeatures(mockDialog));
-            await act(() => result.current.copyAvailableBalance());
+            act(() => result.current.copyAvailableBalance());
+            await flushMicrotasks();
 
             expect(mockWriteText).toHaveBeenCalledWith('36.00');
-            expect(mockDialog.alert).toHaveBeenCalledWith('Available balance copied to clipboard');
+            expect(mockDialog.showAlert).toHaveBeenCalledWith(
+                'Available balance copied to clipboard',
+            );
         });
     });
 
@@ -144,9 +164,10 @@ describe('useFeatures', () => {
         );
 
         const { result } = renderHook(() => useFeatures(mockDialog));
-        await act(() => result.current.debitTransactionsFromToday());
+        act(() => result.current.debitTransactionsFromToday());
+        await flushMicrotasks();
 
-        expect(mockDialog.alert).toHaveBeenCalledWith('2 transactions copied to clipboard');
+        expect(mockDialog.showAlert).toHaveBeenCalledWith('2 transactions copied to clipboard');
     });
 
     it('shows error alert when clipboard write fails', async () => {
@@ -155,9 +176,10 @@ describe('useFeatures', () => {
         mockWriteText.mockRejectedValue(new Error('denied'));
 
         const { result } = renderHook(() => useFeatures(mockDialog));
-        await act(() => result.current.copyCurrentBalance());
+        act(() => result.current.copyCurrentBalance());
+        await flushMicrotasks();
 
-        expect(mockDialog.alert).toHaveBeenCalledWith(
+        expect(mockDialog.showAlert).toHaveBeenCalledWith(
             'Error copying current balance. Please try again.',
         );
     });

@@ -7,75 +7,87 @@ import {
     getAvailableBalance,
 } from '../utils/data';
 
-async function filterDebitsByDate(filterDate: number, dialog: DialogAPI) {
+function copyTransactionsToClipboard(filterDate: number, dialog: DialogAPI) {
     try {
         const transactions = gatherDebitTransactionsInViewSortedByDate()
             .filter((t) => Date.parse(t.date) >= filterDate)
             .map((t) => convertTransactionToTSV(t));
 
         if (transactions.length === 0) {
-            await dialog.alert('No transactions found for the selected date range.');
+            dialog.showAlert('No transactions found for the selected date range.');
             return;
         }
 
-        await navigator.clipboard.writeText(transactions.join('\n'));
-        await dialog.alert(`${transactions.length} transactions copied to clipboard`);
+        navigator.clipboard
+            .writeText(transactions.join('\n'))
+            .then(() => {
+                dialog.showAlert(`${transactions.length} transactions copied to clipboard`);
+            })
+            .catch((error) => {
+                console.error('Error filtering transactions:', error);
+                dialog.showAlert('Error filtering transactions. Please try again.');
+            });
     } catch (error) {
         console.error('Error filtering transactions:', error);
-        await dialog.alert('Error filtering transactions. Please try again.');
+        dialog.showAlert('Error filtering transactions. Please try again.');
     }
 }
 
 export default function useFeatures(dialog: DialogAPI) {
-    const debitTransactionsFromYesterday = useCallback(async () => {
+    const debitTransactionsFromYesterday = useCallback(() => {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        await filterDebitsByDate(Date.parse(yesterday.toLocaleDateString()), dialog);
+        copyTransactionsToClipboard(Date.parse(yesterday.toLocaleDateString()), dialog);
     }, [dialog]);
 
-    const debitTransactionsFromToday = useCallback(async () => {
-        await filterDebitsByDate(Date.parse(new Date().toLocaleDateString()), dialog);
+    const debitTransactionsFromToday = useCallback(() => {
+        copyTransactionsToClipboard(Date.parse(new Date().toLocaleDateString()), dialog);
     }, [dialog]);
 
-    const debitTransactionsWithDate = useCallback(async () => {
-        const selectedDate = await dialog.prompt('Enter start date (blank for today)');
-        if (selectedDate === null) return;
+    const debitTransactionsWithDate = useCallback(() => {
+        dialog.showPrompt('Enter start date (blank for today)', (selectedDate) => {
+            if (selectedDate === null) return;
 
-        const today = new Date().toLocaleDateString();
-        const filterDate = selectedDate ? Date.parse(selectedDate) : Date.parse(today);
-        await filterDebitsByDate(filterDate, dialog);
+            const today = new Date().toLocaleDateString();
+            const filterDate = selectedDate ? Date.parse(selectedDate) : Date.parse(today);
+            copyTransactionsToClipboard(filterDate, dialog);
+        });
     }, [dialog]);
 
-    const copyCurrentBalance = useCallback(async () => {
+    const copyCurrentBalance = useCallback(() => {
         const balance = getCurrentBalance();
         if (!balance) {
-            await dialog.alert('Error: Current balance not found');
+            dialog.showAlert('Error: Current balance not found');
             return;
         }
 
-        try {
-            await navigator.clipboard.writeText(balance);
-            await dialog.alert('Current balance copied to clipboard');
-        } catch (error) {
-            console.error('Error copying current balance:', error);
-            await dialog.alert('Error copying current balance. Please try again.');
-        }
+        navigator.clipboard
+            .writeText(balance)
+            .then(() => {
+                dialog.showAlert('Current balance copied to clipboard');
+            })
+            .catch((error) => {
+                console.error('Error copying current balance:', error);
+                dialog.showAlert('Error copying current balance. Please try again.');
+            });
     }, [dialog]);
 
-    const copyAvailableBalance = useCallback(async () => {
+    const copyAvailableBalance = useCallback(() => {
         const balance = getAvailableBalance();
         if (!balance) {
-            await dialog.alert('Error: Available balance not found');
+            dialog.showAlert('Error: Available balance not found');
             return;
         }
 
-        try {
-            await navigator.clipboard.writeText(balance);
-            await dialog.alert('Available balance copied to clipboard');
-        } catch (error) {
-            console.error('Error copying available balance:', error);
-            await dialog.alert('Error copying available balance. Please try again.');
-        }
+        navigator.clipboard
+            .writeText(balance)
+            .then(() => {
+                dialog.showAlert('Available balance copied to clipboard');
+            })
+            .catch((error) => {
+                console.error('Error copying available balance:', error);
+                dialog.showAlert('Error copying available balance. Please try again.');
+            });
     }, [dialog]);
 
     return {

@@ -19,7 +19,8 @@
             "Bash(grep '\"\"version\"\"' /home/jsanderson/personal/budget/node_modules/@vitejs/plugin-react/package.json)",
             "Bash(grep '\"\"version\"\"' /home/jsanderson/personal/budget/node_modules/vite/package.json)",
             "Bash(grep -oP '.{0,30}\\\\.jsx\\\\\\(.{0,30}' /home/jsanderson/personal/budget/.output/chrome-mv3/content-scripts/content.js)",
-            "Bash(grep -oP '.{0,20}jsx.{0,20}' /home/jsanderson/personal/budget/.output/chrome-mv3/content-scripts/content.js)"
+            "Bash(grep -oP '.{0,20}jsx.{0,20}' /home/jsanderson/personal/budget/.output/chrome-mv3/content-scripts/content.js)",
+            "Bash(git rm:*)"
         ]
     }
 }
