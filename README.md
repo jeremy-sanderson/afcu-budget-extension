@@ -7,7 +7,7 @@ A Chrome extension that enhances the America First Credit Union (AFCU) banking w
 - Adds copy functionality to transaction data on AFCU banking pages
 - Formats transaction data for easy import into spreadsheets or budgeting applications
 - Works seamlessly with the AFCU banking interface at webaccess45.americafirst.com
-- 
+-
 
 ## Installation
 
@@ -25,15 +25,17 @@ There will be a new button in the upper right corner that has several options in
 
 ## Development
 
-For development and testing:
-- Use `test/sample.html` to simulate the banking interface without needing to log into your account
-- The extension follows strict mode JavaScript with ES6+ features
-- All scripts are organized modularly in the `scripts/` directory
+Built with WXT + React + Tailwind CSS 4, rendering inside a Shadow DOM for style isolation.
+
+- `npm run dev` — Start dev server with hot reload
+- `npm run build` — Build to `.output/chrome-mv3/`
+- `npm test` — Run unit tests
+- Load `.output/chrome-mv3` as unpacked extension in Chrome
+- Use `test/sample.html` as a DOM structure reference
 
 ## Icons
 
 Icons by: [Icon by FACH][icon-attribution]
-
 
 [spreadsheet-instructions-md]: SPREADSHEET-INSTRUCTIONS.md
 [icon-attribution]: https://www.freepik.com/icon/financial_15769437#fromView=keyword&page=1&position=0&uuid=3adade23-a318-4da1-abc2-90e263724313
