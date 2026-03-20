@@ -45,10 +45,13 @@ export default function useDialog(): DialogAPI {
         setDialogState({ type: null, message: '', resolve: null });
     }, [dialogState.resolve]);
 
-    const resolveDialog = useCallback((value: any) => {
-        dialogState.resolve?.(value);
-        setDialogState({ type: null, message: '', resolve: null });
-    }, [dialogState.resolve]);
+    const resolveDialog = useCallback(
+        (value: any) => {
+            dialogState.resolve?.(value);
+            setDialogState({ type: null, message: '', resolve: null });
+        },
+        [dialogState.resolve],
+    );
 
     return { dialogState, alert, confirm, prompt, closeDialog, resolveDialog };
 }

@@ -10,8 +10,8 @@ import {
 async function filterDebitsByDate(filterDate: number, dialog: DialogAPI) {
     try {
         const transactions = gatherDebitTransactionsInViewSortedByDate()
-            .filter(t => Date.parse(t.date) >= filterDate)
-            .map(t => convertTransactionToTSV(t));
+            .filter((t) => Date.parse(t.date) >= filterDate)
+            .map((t) => convertTransactionToTSV(t));
 
         if (transactions.length === 0) {
             await dialog.alert('No transactions found for the selected date range.');

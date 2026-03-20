@@ -32,12 +32,14 @@ export function getAllRowsInPastTransactionTable(): Element[] {
 
 export function gatherDebitTransactionsInViewSortedByDate(): Transaction[] {
     return getAllRowsInPastTransactionTable()
-        .map(row => getRowData(row))
+        .map((row) => getRowData(row))
         .filter((t): t is Transaction => t !== null && t.amount < 0)
-        .map(t => ({ ...t, amount: Math.abs(t.amount) }))
+        .map((t) => ({ ...t, amount: Math.abs(t.amount) }))
         .sort((a, b) => {
             const dateComparison = Date.parse(a.date) - Date.parse(b.date);
-            return dateComparison === 0 ? a.description.localeCompare(b.description) : dateComparison;
+            return dateComparison === 0
+                ? a.description.localeCompare(b.description)
+                : dateComparison;
         });
 }
 
@@ -45,13 +47,14 @@ export function getCurrentBalance(): string | null {
     const accountDetails = document.querySelector('div.account-details');
     if (!accountDetails) return null;
 
-    const balanceRow = [...accountDetails.querySelectorAll('.row')].find(
-        row => row.querySelector('.detail-label-col span')?.textContent?.includes('Balance')
+    const balanceRow = [...accountDetails.querySelectorAll('.row')].find((row) =>
+        row.querySelector('.detail-label-col span')?.textContent?.includes('Balance'),
     );
 
     if (!balanceRow) return null;
 
-    const balanceText = balanceRow.querySelector('.detail-item-col span')?.textContent?.trim() ?? '';
+    const balanceText =
+        balanceRow.querySelector('.detail-item-col span')?.textContent?.trim() ?? '';
     return balanceText.replace('$', '').replace(',', '') || null;
 }
 

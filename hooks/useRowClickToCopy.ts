@@ -1,8 +1,12 @@
 import { useEffect } from 'react';
-import { getAllRowsInPastTransactionTable, getRowData, convertTransactionToTSV } from '../utils/data';
+import {
+    getAllRowsInPastTransactionTable,
+    getRowData,
+    convertTransactionToTSV,
+} from '../utils/data';
 
 function setupRowClickHandlers() {
-    getAllRowsInPastTransactionTable().forEach(row => {
+    getAllRowsInPastTransactionTable().forEach((row) => {
         const transaction = getRowData(row);
         if (transaction && transaction.amount < 0) {
             const debitTransaction = { ...transaction, amount: Math.abs(transaction.amount) };
@@ -21,9 +25,10 @@ function setupRowClickHandlers() {
             });
 
             newRow.addEventListener('click', () => {
-                navigator.clipboard.writeText(convertTransactionToTSV(debitTransaction))
+                navigator.clipboard
+                    .writeText(convertTransactionToTSV(debitTransaction))
                     .then(() => console.log('Saved to clipboard', debitTransaction))
-                    .catch(error => console.error('Error copying transaction:', error));
+                    .catch((error) => console.error('Error copying transaction:', error));
             });
         }
     });

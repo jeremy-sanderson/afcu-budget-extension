@@ -11,7 +11,12 @@ beforeEach(() => {
 describe('ConfirmDialog', () => {
     it('renders message and both buttons when open', () => {
         render(
-            <ConfirmDialog message="Are you sure?" open={true} onConfirm={() => {}} onCancel={() => {}} />
+            <ConfirmDialog
+                message="Are you sure?"
+                open={true}
+                onConfirm={() => {}}
+                onCancel={() => {}}
+            />,
         );
         expect(screen.getByText('Are you sure?')).toBeInTheDocument();
         expect(screen.getByText('OK')).toBeInTheDocument();
@@ -23,7 +28,12 @@ describe('ConfirmDialog', () => {
         const onConfirm = vi.fn();
         const onCancel = vi.fn();
         render(
-            <ConfirmDialog message="Confirm?" open={true} onConfirm={onConfirm} onCancel={onCancel} />
+            <ConfirmDialog
+                message="Confirm?"
+                open={true}
+                onConfirm={onConfirm}
+                onCancel={onCancel}
+            />,
         );
 
         await user.click(screen.getByText('OK'));
@@ -34,7 +44,12 @@ describe('ConfirmDialog', () => {
         const user = userEvent.setup();
         const onCancel = vi.fn();
         render(
-            <ConfirmDialog message="Confirm?" open={true} onConfirm={() => {}} onCancel={onCancel} />
+            <ConfirmDialog
+                message="Confirm?"
+                open={true}
+                onConfirm={() => {}}
+                onCancel={onCancel}
+            />,
         );
 
         await user.click(screen.getByText('Cancel'));

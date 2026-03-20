@@ -43,7 +43,7 @@ function setupTransactionTable(rows: HTMLTableRowElement[]) {
         </div>
     `;
     const tbody = document.querySelector('#PastTransactionsGrid table tbody')!;
-    rows.forEach(row => tbody.appendChild(row));
+    rows.forEach((row) => tbody.appendChild(row));
 }
 
 describe('getRowData', () => {
@@ -137,7 +137,7 @@ describe('gatherDebitTransactionsInViewSortedByDate', () => {
 
         const result = gatherDebitTransactionsInViewSortedByDate();
         expect(result).toHaveLength(2);
-        result.forEach(t => expect(t.amount).toBeGreaterThan(0));
+        result.forEach((t) => expect(t.amount).toBeGreaterThan(0));
     });
 
     it('sorts by date ascending', () => {

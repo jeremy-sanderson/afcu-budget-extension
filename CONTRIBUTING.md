@@ -9,25 +9,25 @@ The extension is built with WXT + React + Tailwind CSS 4, rendering inside a Sha
 ### Source Structure
 
 - **`entrypoints/content/`** — Content script entrypoint
-  - `index.tsx` — Shadow DOM setup and React mount
-  - `App.tsx` — Root component wiring hooks, menu, and dialogs
-  - `style.css` — Tailwind CSS import
+    - `index.tsx` — Shadow DOM setup and React mount
+    - `App.tsx` — Root component wiring hooks, menu, and dialogs
+    - `style.css` — Tailwind CSS import
 
 - **`components/`** — React UI components
-  - `BudgetMenu.tsx` — Fixed-position dropdown menu button
-  - `MenuItem.tsx` — Individual menu item
-  - `AlertDialog.tsx` — Alert modal (replaces vendored Prompts library)
-  - `ConfirmDialog.tsx` — Confirm modal
-  - `PromptDialog.tsx` — Prompt modal with text input
+    - `BudgetMenu.tsx` — Fixed-position dropdown menu button
+    - `MenuItem.tsx` — Individual menu item
+    - `AlertDialog.tsx` — Alert modal (replaces vendored Prompts library)
+    - `ConfirmDialog.tsx` — Confirm modal
+    - `PromptDialog.tsx` — Prompt modal with text input
 
 - **`hooks/`** — React hooks
-  - `useDialog.ts` — Async dialog state management
-  - `useFeatures.ts` — Menu action handlers (clipboard, date filtering)
-  - `useRowClickToCopy.ts` — Individual transaction row click-to-copy via MutationObserver
+    - `useDialog.ts` — Async dialog state management
+    - `useFeatures.ts` — Menu action handlers (clipboard, date filtering)
+    - `useRowClickToCopy.ts` — Individual transaction row click-to-copy via MutationObserver
 
 - **`utils/`** — Pure utility functions
-  - `types.ts` — Transaction type definition
-  - `data.ts` — DOM scraping and data transformation
+    - `types.ts` — Transaction type definition
+    - `data.ts` — DOM scraping and data transformation
 
 ### Supporting Files
 

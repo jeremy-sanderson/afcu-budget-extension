@@ -46,7 +46,7 @@ describe('BudgetMenu', () => {
         render(<BudgetMenu items={mockItems} />);
 
         await user.click(screen.getByText('Budgeting'));
-        mockItems.forEach(item => {
+        mockItems.forEach((item) => {
             expect(screen.getByText(item.text)).toBeInTheDocument();
         });
     });

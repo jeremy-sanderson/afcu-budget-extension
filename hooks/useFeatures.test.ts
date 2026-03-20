@@ -140,7 +140,7 @@ describe('useFeatures', () => {
             { date: new Date().toLocaleDateString(), description: 'B', amount: 20 },
         ]);
         vi.mocked(data.convertTransactionToTSV).mockImplementation(
-            t => `${t.date}\t${t.description}\t${t.amount}`
+            (t) => `${t.date}\t${t.description}\t${t.amount}`,
         );
 
         const { result } = renderHook(() => useFeatures(mockDialog));
@@ -157,6 +157,8 @@ describe('useFeatures', () => {
         const { result } = renderHook(() => useFeatures(mockDialog));
         await act(() => result.current.copyCurrentBalance());
 
-        expect(mockDialog.alert).toHaveBeenCalledWith('Error copying current balance. Please try again.');
+        expect(mockDialog.alert).toHaveBeenCalledWith(
+            'Error copying current balance. Please try again.',
+        );
     });
 });

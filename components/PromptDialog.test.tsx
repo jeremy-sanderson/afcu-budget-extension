@@ -11,7 +11,12 @@ beforeEach(() => {
 describe('PromptDialog', () => {
     it('renders message and input when open', () => {
         render(
-            <PromptDialog message="Enter value:" open={true} onSubmit={() => {}} onCancel={() => {}} />
+            <PromptDialog
+                message="Enter value:"
+                open={true}
+                onSubmit={() => {}}
+                onCancel={() => {}}
+            />,
         );
         expect(screen.getByText('Enter value:')).toBeInTheDocument();
         // Dialog content is inaccessible in happy-dom since dialog isn't truly "open"
@@ -22,7 +27,7 @@ describe('PromptDialog', () => {
         const user = userEvent.setup();
         const onSubmit = vi.fn();
         render(
-            <PromptDialog message="Enter:" open={true} onSubmit={onSubmit} onCancel={() => {}} />
+            <PromptDialog message="Enter:" open={true} onSubmit={onSubmit} onCancel={() => {}} />,
         );
 
         const input = screen.getByRole('textbox', { hidden: true });
@@ -35,7 +40,7 @@ describe('PromptDialog', () => {
         const user = userEvent.setup();
         const onCancel = vi.fn();
         render(
-            <PromptDialog message="Enter:" open={true} onSubmit={() => {}} onCancel={onCancel} />
+            <PromptDialog message="Enter:" open={true} onSubmit={() => {}} onCancel={onCancel} />,
         );
 
         await user.click(screen.getByText('Cancel'));
@@ -46,7 +51,7 @@ describe('PromptDialog', () => {
         const user = userEvent.setup();
         const onSubmit = vi.fn();
         render(
-            <PromptDialog message="Enter:" open={true} onSubmit={onSubmit} onCancel={() => {}} />
+            <PromptDialog message="Enter:" open={true} onSubmit={onSubmit} onCancel={() => {}} />,
         );
 
         await user.click(screen.getByText('OK'));
