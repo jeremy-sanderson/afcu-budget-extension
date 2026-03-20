@@ -1,33 +1,39 @@
-# Budget Chrome Extension Reference
+# AFCU Budget Chrome Extension
 
 ## Project Overview
-Chrome extension that adds clipboard functionality to AFCU banking website for budgeting purposes.
+Chrome extension (WXT + React + Tailwind CSS 4) that adds clipboard functionality to the AFCU banking website for budgeting purposes. Renders inside a Shadow DOM for style isolation.
 
 ## Development Commands
-```
-# Manual testing
-Open Chrome's extension page (chrome://extensions/), enable Developer mode
-Click "Load unpacked" and select this directory
-Navigate to AFCU banking site to test
+- `npm run dev` — Start WXT dev server with hot reload
+- `npm run build` — Build for production to `.output/chrome-mv3/`
+- `npm test` — Run unit tests
+- `npm run test:watch` — Run tests in watch mode
 
-# Testing with sample
-Open test/sample.html in browser to simulate banking interface
-```
+## Manual Testing
+Load `.output/chrome-mv3` as unpacked extension in Chrome.
+Navigate to AFCU banking site to test.
+
+## Project Structure
+- `entrypoints/content/` — Content script entrypoint (Shadow DOM + React mount)
+- `components/` — React UI components (BudgetMenu, dialogs)
+- `hooks/` — React hooks (useDialog, useFeatures, useRowClickToCopy)
+- `utils/` — Data scraping utilities and types
+- `public/icon/` — Extension icons
+- `test/sample.html` — Captured AFCU page snapshot for reference
 
 ## Code Style Guidelines
-- Use JavaScript strict mode ('use strict')
+- TypeScript with strict mode
 - 4-space indentation
 - camelCase for variable and function names
 - Use arrow functions for callbacks
 - Use const/let (avoid var)
-- Prefix private functions with underscore
 - Clean logic with early returns
 - Organize related functionality into discrete functions
-- Replace inline styles with Object.assign when possible
 - Use descriptive variable names
 - Use optional chaining and nullish coalescing for safe property access
+- Colocate test files next to source files
 
 ## Error Handling
 - Use try/catch for async operations
-- Provide user feedback via Prompts.alert() for errors
+- Show user feedback via dialog components (AlertDialog, PromptDialog, ConfirmDialog)
 - Log errors to console with detailed messages

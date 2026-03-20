@@ -4,83 +4,70 @@ Thank you for your interest in contributing to the AFCU Budget Chrome Extension!
 
 ## Code Organization
 
-The extension is organized into modular JavaScript files, each handling specific functionality:
+The extension is built with WXT + React + Tailwind CSS 4, rendering inside a Shadow DOM for style isolation.
 
-### Core Scripts (loaded in order)
+### Source Structure
 
-1. **`scripts/config.js`** - Configuration and constants
-   - Color schemes and styling constants
-   - Global configuration values
+- **`entrypoints/content/`** — Content script entrypoint
+  - `index.tsx` — Shadow DOM setup and React mount
+  - `App.tsx` — Root component wiring hooks, menu, and dialogs
+  - `style.css` — Tailwind CSS import
 
-2. **`scripts/prompts.js`** - User interaction utilities
-   - Alert and confirmation dialogs
-   - Date input prompts
-   - User feedback mechanisms
+- **`components/`** — React UI components
+  - `BudgetMenu.tsx` — Fixed-position dropdown menu button
+  - `MenuItem.tsx` — Individual menu item
+  - `AlertDialog.tsx` — Alert modal (replaces vendored Prompts library)
+  - `ConfirmDialog.tsx` — Confirm modal
+  - `PromptDialog.tsx` — Prompt modal with text input
 
-3. **`scripts/ui.js`** - UI component creation
-   - Menu button and container creation
-   - Menu item generation
-   - DOM manipulation helpers
+- **`hooks/`** — React hooks
+  - `useDialog.ts` — Async dialog state management
+  - `useFeatures.ts` — Menu action handlers (clipboard, date filtering)
+  - `useRowClickToCopy.ts` — Individual transaction row click-to-copy via MutationObserver
 
-4. **`scripts/data.js`** - Data extraction and processing
-   - Transaction data parsing
-   - Balance information extraction
-   - Data formatting for clipboard
-
-5. **`scripts/features.js`** - Main feature implementations
-   - Transaction filtering by date
-   - Clipboard operations
-   - Individual transaction link creation
-
-6. **`scripts/init.js`** - Extension initialization
-   - Event listener setup
-   - Feature initialization
-   - Entry point for the extension
+- **`utils/`** — Pure utility functions
+  - `types.ts` — Transaction type definition
+  - `data.ts` — DOM scraping and data transformation
 
 ### Supporting Files
 
-- **`manifest.json`** - Chrome extension configuration
-- **`icons/`** - Extension icons in various sizes
-- **`test/sample.html`** - Testing interface for development
+- **`public/icon/`** — Extension icons in various sizes
+- **`test/sample.html`** — Captured AFCU page snapshot for reference
+- **`wxt.config.ts`** — WXT configuration
+- **`vitest.config.ts`** — Test configuration
 
 ## Development Guidelines
 
 ### Code Style
 
-- Use strict mode (`'use strict'`) in all JavaScript files
+- TypeScript with strict mode
 - 4-space indentation
 - camelCase for variables and functions
 - Arrow functions for callbacks
 - Use `const`/`let` (avoid `var`)
-- Prefix private functions with underscore
 - Early returns for cleaner logic
 - Descriptive variable names
 - Optional chaining and nullish coalescing for safe property access
-
-### Code Structure
-
-- Group related functionality with comment headers
-- Keep functions focused and single-purpose
-- Handle errors with try/catch blocks
-- Provide user feedback via `Prompts.alert()` for errors
-- Log errors to console with detailed messages
+- Colocate test files next to source files
 
 ### Testing
 
-1. Load the extension in Chrome Developer Mode
-2. Test on the actual AFCU banking site
-3. Use `test/sample.html` for offline testing
-4. Verify clipboard functionality works correctly
-5. Check console for any errors
+- `npm test` — Run all unit tests
+- `npm run test:watch` — Run tests in watch mode
+- Tests use Vitest + happy-dom + Testing Library
+- Load `.output/chrome-mv3` as unpacked extension for manual testing
+- Use `test/sample.html` as a DOM structure reference
 
 ### Making Changes
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/your-feature`)
 3. Make your changes following the code style guidelines
-4. Test thoroughly on both the sample page and actual banking site
-5. Commit with clear, descriptive messages
-6. Push to your fork and create a pull request
+4. Run `npm test` to verify all tests pass
+5. Run `npm run build` to verify the build succeeds
+6. Test on the actual AFCU banking site
+7. Commit with clear, descriptive messages
+8. Push to your fork and create a pull request
 
 ### Pull Request Guidelines
 
@@ -95,7 +82,7 @@ The extension is organized into modular JavaScript files, each handling specific
 - Never log sensitive banking information
 - Ensure clipboard operations only copy intended data
 - Follow Chrome extension security best practices
-- Don't add unnecessary permissions to manifest.json
+- Don't add unnecessary permissions to the manifest
 
 ## Questions?
 
