@@ -13,7 +13,7 @@ vi.mock('../utils/data', () => ({
 
 function createMockDialog(): DialogAPI {
     return {
-        dialogState: { type: null, message: '', resolve: null },
+        dialogState: { type: null, message: '' },
         alert: vi.fn().mockResolvedValue(undefined),
         confirm: vi.fn().mockResolvedValue(true),
         prompt: vi.fn().mockResolvedValue(''),

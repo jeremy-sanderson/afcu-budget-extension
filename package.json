@@ -12,7 +12,8 @@
         "format:check": "prettier --check .",
         "lint": "eslint .",
         "lint:fix": "eslint --fix .",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit",
+        "ftl": "echo format && npm run format && echo lint && npm run lint && echo typecheck && npm run typecheck"
     },
     "dependencies": {
         "react": "^19.0.0",
