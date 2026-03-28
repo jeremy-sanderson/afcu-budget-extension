@@ -5,26 +5,28 @@ import {
     convertTransactionToTSV,
 } from '../utils/data';
 
+const HANDLED_ATTR = 'data-click-to-copy';
+
 function setupRowClickHandlers() {
     getAllRowsInPastTransactionTable().forEach((row) => {
+        const el = row as HTMLElement;
+        if (el.hasAttribute(HANDLED_ATTR)) return;
+
         const transaction = getRowData(row);
         if (transaction && transaction.amount < 0) {
             const debitTransaction = { ...transaction, amount: Math.abs(transaction.amount) };
-            const el = row as HTMLElement;
+            el.setAttribute(HANDLED_ATTR, '');
             el.style.cursor = 'pointer';
 
-            const newRow = row.cloneNode(true) as HTMLElement;
-            row.parentNode?.replaceChild(newRow, row);
-
-            newRow.addEventListener('mouseover', () => {
-                newRow.style.color = 'blue';
+            el.addEventListener('mouseover', () => {
+                el.style.color = 'blue';
             });
 
-            newRow.addEventListener('mouseout', () => {
-                newRow.style.color = 'unset';
+            el.addEventListener('mouseout', () => {
+                el.style.color = 'unset';
             });
 
-            newRow.addEventListener('click', () => {
+            el.addEventListener('click', () => {
                 navigator.clipboard
                     .writeText(convertTransactionToTSV(debitTransaction))
                     .then(() => console.log('Saved to clipboard', debitTransaction))
