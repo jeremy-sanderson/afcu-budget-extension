@@ -12,10 +12,14 @@ A Chrome extension that enhances the America First Credit Union (AFCU) banking w
 ## Installation
 
 1. Clone this repository or download the source code
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode" in the top right corner
-4. Click "Load unpacked" and select this project directory
-5. The extension will now be active when you visit your AFCU banking account
+2. Install npm modules and build the code
+
+- `npm run install && npm run build`
+
+3. Open Chrome and navigate to `chrome://extensions/`
+4. Enable "Developer mode" in the top right corner
+5. Click "Load unpacked" and select the .output/ directory
+6. The extension will now be active when you visit your AFCU banking account
 
 ## Usage
 
