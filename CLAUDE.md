@@ -18,12 +18,12 @@ Navigate to AFCU banking site to test.
 
 ## Project Structure
 
-- `entrypoints/content/` — Content script entrypoint (Shadow DOM + React mount)
-- `components/` — React UI components (BudgetMenu, dialogs)
-- `hooks/` — React hooks (useDialog, useFeatures, useRowClickToCopy)
-- `utils/` — Data scraping utilities and types
-- `public/icon/` — Extension icons
-- `test/sample.html` — Captured AFCU page snapshot for reference
+- `src/entrypoints/content/` — Content script entrypoint (Shadow DOM + React mount)
+- `src/components/` — React UI components (BudgetMenu, dialogs)
+- `src/hooks/` — React hooks (useDialog, useFeatures, useRowClickToCopy)
+- `src/utils/` — Data scraping utilities and types
+- `src/public/icon/` — Extension icons
+- `src/test/sample.html` — Captured AFCU page snapshot for reference
 
 ## Code Style Guidelines
 

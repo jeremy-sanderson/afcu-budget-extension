@@ -1,26 +1,28 @@
 {
-    "permissions": {
-        "allow": [
-            "WebFetch(domain:redreamality.com)",
-            "WebFetch(domain:wxt.dev)",
-            "WebFetch(domain:www.npmjs.com)",
-            "WebFetch(domain:extensionbooster.com)",
-            "WebFetch(domain:npmtrends.com)",
-            "WebFetch(domain:npm-compare.com)",
-            "WebFetch(domain:zenn.dev)",
-            "WebFetch(domain:aabidk.dev)",
-            "WebFetch(domain:deepwiki.com)",
-            "Bash(npm install:*)",
-            "Bash(npm run:*)",
-            "Bash(npm test:*)",
-            "Bash(npx wxt:*)",
-            "Bash(grep -oP '.{0,80}jsxDEV.{0,80}' /home/jsanderson/personal/budget/.output/chrome-mv3/content-scripts/content.js)",
-            "Bash(grep -oP '.{0,40}jsxDEV.{0,40}' /home/jsanderson/personal/budget/.output/chrome-mv3/content-scripts/content.js)",
-            "Bash(grep '\"\"version\"\"' /home/jsanderson/personal/budget/node_modules/@vitejs/plugin-react/package.json)",
-            "Bash(grep '\"\"version\"\"' /home/jsanderson/personal/budget/node_modules/vite/package.json)",
-            "Bash(grep -oP '.{0,30}\\\\.jsx\\\\\\(.{0,30}' /home/jsanderson/personal/budget/.output/chrome-mv3/content-scripts/content.js)",
-            "Bash(grep -oP '.{0,20}jsx.{0,20}' /home/jsanderson/personal/budget/.output/chrome-mv3/content-scripts/content.js)",
-            "Bash(git rm:*)"
-        ]
-    }
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:redreamality.com)",
+      "WebFetch(domain:wxt.dev)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:extensionbooster.com)",
+      "WebFetch(domain:npmtrends.com)",
+      "WebFetch(domain:npm-compare.com)",
+      "WebFetch(domain:zenn.dev)",
+      "WebFetch(domain:aabidk.dev)",
+      "WebFetch(domain:deepwiki.com)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(npx wxt:*)",
+      "Bash(grep -oP '.{0,80}jsxDEV.{0,80}' /home/jsanderson/personal/budget/.output/chrome-mv3/content-scripts/content.js)",
+      "Bash(grep -oP '.{0,40}jsxDEV.{0,40}' /home/jsanderson/personal/budget/.output/chrome-mv3/content-scripts/content.js)",
+      "Bash(grep '\"\"version\"\"' /home/jsanderson/personal/budget/node_modules/@vitejs/plugin-react/package.json)",
+      "Bash(grep '\"\"version\"\"' /home/jsanderson/personal/budget/node_modules/vite/package.json)",
+      "Bash(grep -oP '.{0,30}\\\\.jsx\\\\\\(.{0,30}' /home/jsanderson/personal/budget/.output/chrome-mv3/content-scripts/content.js)",
+      "Bash(grep -oP '.{0,20}jsx.{0,20}' /home/jsanderson/personal/budget/.output/chrome-mv3/content-scripts/content.js)",
+      "Bash(git rm:*)",
+      "Bash(mkdir src:*)",
+      "Bash(mv components:*)"
+    ]
+  }
 }
