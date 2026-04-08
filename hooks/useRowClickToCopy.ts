@@ -6,6 +6,8 @@ import {
 } from '../utils/data';
 
 const HANDLED_ATTR = 'data-click-to-copy';
+const RED_100 = '#fee2e2';
+const GREEN_100 = '#dcfce7';
 
 function setupRowClickHandlers() {
     getAllRowsInPastTransactionTable().forEach((row) => {
@@ -13,10 +15,14 @@ function setupRowClickHandlers() {
         if (el.hasAttribute(HANDLED_ATTR)) return;
 
         const transaction = getRowData(row);
-        if (transaction && transaction.amount < 0) {
+        if (!transaction) return;
+
+        el.setAttribute(HANDLED_ATTR, '');
+
+        if (transaction.amount < 0) {
             const debitTransaction = { ...transaction, amount: Math.abs(transaction.amount) };
-            el.setAttribute(HANDLED_ATTR, '');
             el.style.cursor = 'pointer';
+            el.style.setProperty('background-color', RED_100, 'important');
 
             el.addEventListener('mouseover', () => {
                 el.style.color = 'blue';
@@ -32,6 +38,8 @@ function setupRowClickHandlers() {
                     .then(() => console.log('Saved to clipboard', debitTransaction))
                     .catch((error) => console.error('Error copying transaction:', error));
             });
+        } else {
+            el.style.setProperty('background-color', GREEN_100, 'important');
         }
     });
 }
