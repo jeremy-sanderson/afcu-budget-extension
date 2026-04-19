@@ -2,6 +2,7 @@ import useDialog from '../../hooks/useDialog';
 import useFeatures from '../../hooks/useFeatures';
 import useRowClickToCopy from '../../hooks/useRowClickToCopy';
 import BudgetMenu from '../../components/BudgetMenu';
+import BudgetPanel from '../../components/BudgetPanel';
 import AlertDialog from '../../components/AlertDialog';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import PromptDialog from '../../components/PromptDialog';
@@ -22,6 +23,7 @@ export default function App() {
     return (
         <>
             <BudgetMenu items={menuItems} />
+            <BudgetPanel items={menuItems} />
             {dialog.dialogState.type === 'alert' && (
                 <AlertDialog message={dialog.dialogState.message} onClose={dialog.close} />
             )}

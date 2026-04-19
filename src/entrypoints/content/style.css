@@ -13,6 +13,8 @@
     --text-lg--line-height: 28px;
     --text-xl: 20px;
     --text-xl--line-height: 28px;
+
+    --breakpoint-wide: 1550px;
 }
 
 :host {
