@@ -23,7 +23,11 @@
             "Bash(git rm:*)",
             "Bash(mkdir src:*)",
             "Bash(mv components:*)",
-            "Bash(date *)"
+            "Bash(date *)",
+            "Bash(git -C /home/jsanderson/personal/budget rev-parse HEAD)",
+            "Bash(git -C /home/jsanderson/personal/budget branch --show-current)",
+            "Bash(git -C /home/jsanderson/personal/budget remote get-url origin)",
+            "Bash(npx prettier *)"
         ]
     }
 }

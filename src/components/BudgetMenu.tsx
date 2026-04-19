@@ -7,7 +7,7 @@ interface BudgetMenuProps {
 export default function BudgetMenu({ items }: BudgetMenuProps) {
     return (
         <Menu.Root>
-            <div className="fixed top-[90px] right-[10px] z-[99999]">
+            <div className="fixed top-[90px] right-[10px] z-[99999] wide:hidden">
                 <Menu.Trigger className="px-5 py-2.5 bg-[#00548e] text-white border-none rounded-md cursor-pointer">
                     Budgeting
                 </Menu.Trigger>
