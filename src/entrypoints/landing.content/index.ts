@@ -3,7 +3,7 @@ const HIGHLIGHT_COLOR = '#fff59d';
 export default defineContentScript({
     matches: ['*://*.americafirst.com/*'],
 
-    main(_ctx) {
+    main() {
         setTimeout(() => {
             const input = document.querySelector<HTMLInputElement>('#txtUserID');
             if (!input) return;
