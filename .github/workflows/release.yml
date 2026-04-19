@@ -1,0 +1,63 @@
+name: Release
+
+on:
+    push:
+        branches: [main]
+
+permissions:
+    contents: write
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 2
+
+            - name: Detect version change
+              id: version
+              run: |
+                  current=$(node -p "require('./package.json').version")
+                  previous=$(git show HEAD~1:package.json 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version" 2>/dev/null || echo "")
+                  echo "current=$current" >> "$GITHUB_OUTPUT"
+                  echo "previous=$previous" >> "$GITHUB_OUTPUT"
+                  if [ "$current" != "$previous" ] && [ -n "$current" ]; then
+                      echo "changed=true" >> "$GITHUB_OUTPUT"
+                      echo "Version changed: $previous -> $current"
+                  else
+                      echo "changed=false" >> "$GITHUB_OUTPUT"
+                      echo "Version unchanged ($current); skipping release."
+                  fi
+
+            - uses: actions/setup-node@v4
+              if: steps.version.outputs.changed == 'true'
+              with:
+                  node-version-file: .nvmrc
+                  cache: npm
+
+            - name: Install dependencies
+              if: steps.version.outputs.changed == 'true'
+              run: npm ci
+
+            - name: Build extension
+              if: steps.version.outputs.changed == 'true'
+              run: npm run build
+
+            - name: Package extension
+              if: steps.version.outputs.changed == 'true'
+              id: package
+              run: |
+                  version="${{ steps.version.outputs.current }}"
+                  artifact="afcu-budget-v${version}.zip"
+                  (cd .output/chrome-mv3 && zip -r "../../${artifact}" .)
+                  echo "artifact=${artifact}" >> "$GITHUB_OUTPUT"
+
+            - name: Create GitHub Release
+              if: steps.version.outputs.changed == 'true'
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: v${{ steps.version.outputs.current }}
+                  name: v${{ steps.version.outputs.current }}
+                  generate_release_notes: true
+                  files: ${{ steps.package.outputs.artifact }}
