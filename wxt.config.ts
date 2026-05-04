@@ -7,7 +7,7 @@ export default defineConfig({
     manifest: {
         name: 'AFCU Budget (beta)',
         description: 'Clipboard functionality for AFCU banking website budgeting',
-        permissions: ['clipboardWrite'],
+        permissions: ['clipboardWrite', 'storage'],
     },
     vite: () => ({
         plugins: [tailwindcss()],
