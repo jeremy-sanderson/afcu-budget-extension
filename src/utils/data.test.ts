@@ -3,6 +3,7 @@ import {
     getRowData,
     convertTransactionToTSV,
     gatherDebitTransactionsInViewSortedByDate,
+    gatherDebitsByDate,
     getCurrentBalance,
     getAvailableBalance,
 } from './data';
@@ -173,6 +174,54 @@ describe('gatherDebitTransactionsInViewSortedByDate', () => {
         ]);
 
         expect(gatherDebitTransactionsInViewSortedByDate()).toEqual([]);
+    });
+});
+
+describe('gatherDebitsByDate', () => {
+    beforeEach(() => {
+        document.body.innerHTML = '';
+    });
+
+    it('groups debits by date with counts and the underlying transactions', () => {
+        setupTransactionTable([
+            createTransactionRow({ date: '4/9/2025', description: 'GOOGLE', amount: '-$10.73' }),
+            createTransactionRow({ date: '4/9/2025', description: 'VENMO', amount: '-$45.00' }),
+            createTransactionRow({ date: '4/12/2025', description: 'WALMART', amount: '-$203.07' }),
+        ]);
+
+        const result = gatherDebitsByDate();
+        expect(result).toHaveLength(2);
+        expect(result[0]).toMatchObject({ date: '4/9/2025', count: 2 });
+        expect(result[0].transactions).toHaveLength(2);
+        expect(result[1]).toMatchObject({ date: '4/12/2025', count: 1 });
+        expect(result[1].transactions[0].description).toBe('WALMART');
+    });
+
+    it('sorts groups by date ascending', () => {
+        setupTransactionTable([
+            createTransactionRow({ date: '4/12/2025', description: 'WALMART', amount: '-$203.07' }),
+            createTransactionRow({ date: '4/9/2025', description: 'GOOGLE', amount: '-$10.73' }),
+        ]);
+
+        const result = gatherDebitsByDate();
+        expect(result.map((d) => d.date)).toEqual(['4/9/2025', '4/12/2025']);
+    });
+
+    it('excludes credit transactions', () => {
+        setupTransactionTable([
+            createTransactionRow({ date: '4/11/2025', description: 'TRANSFER', amount: '$204.00' }),
+            createTransactionRow({ date: '4/11/2025', description: 'AMAZON', amount: '-$25.00' }),
+        ]);
+
+        const result = gatherDebitsByDate();
+        expect(result).toHaveLength(1);
+        expect(result[0].count).toBe(1);
+        expect(result[0].transactions[0].description).toBe('AMAZON');
+    });
+
+    it('returns an empty array when there are no debits', () => {
+        setupTransactionTable([]);
+        expect(gatherDebitsByDate()).toEqual([]);
     });
 });
 

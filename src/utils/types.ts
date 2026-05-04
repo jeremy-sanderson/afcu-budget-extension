@@ -3,3 +3,9 @@ export interface Transaction {
     description: string;
     amount: number;
 }
+
+export interface DebitsForDate {
+    date: string;
+    count: number;
+    transactions: Transaction[];
+}

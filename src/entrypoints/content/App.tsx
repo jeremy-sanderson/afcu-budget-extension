@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import useDialog from '../../hooks/useDialog';
 import useFeatures from '../../hooks/useFeatures';
 import useRowClickToCopy from '../../hooks/useRowClickToCopy';
@@ -6,11 +7,31 @@ import BudgetPanel from '../../components/BudgetPanel';
 import AlertDialog from '../../components/AlertDialog';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import PromptDialog from '../../components/PromptDialog';
+import SummaryDialog from '../../components/SummaryDialog';
+import { gatherDebitsByDate, getAvailableBalance, getCurrentBalance } from '../../utils/data';
+import type { DebitsForDate } from '../../utils/types';
+import { useGenerateSummaries } from '../../utils/settings';
+
+interface SummaryData {
+    currentBalance: string | null;
+    availableBalance: string | null;
+    debitsByDate: DebitsForDate[];
+}
 
 export default function App() {
     const dialog = useDialog();
     const features = useFeatures(dialog);
+    const [generateSummaries] = useGenerateSummaries();
+    const [summary, setSummary] = useState<SummaryData | null>(null);
     useRowClickToCopy();
+
+    const openSummary = () => {
+        setSummary({
+            currentBalance: getCurrentBalance(),
+            availableBalance: getAvailableBalance(),
+            debitsByDate: gatherDebitsByDate(),
+        });
+    };
 
     const menuItems = [
         { text: 'Debits from Yesterday', onClick: features.debitTransactionsFromYesterday },
@@ -18,6 +39,7 @@ export default function App() {
         { text: 'Debits from Date', onClick: features.debitTransactionsWithDate },
         { text: 'Current Balance', onClick: features.copyCurrentBalance },
         { text: 'Available Balance', onClick: features.copyAvailableBalance },
+        ...(generateSummaries ? [{ text: 'Summary', onClick: openSummary }] : []),
     ];
 
     return (
@@ -59,6 +81,14 @@ export default function App() {
                         }
                         dialog.close();
                     }}
+                />
+            )}
+            {summary && (
+                <SummaryDialog
+                    currentBalance={summary.currentBalance}
+                    availableBalance={summary.availableBalance}
+                    debitsByDate={summary.debitsByDate}
+                    onClose={() => setSummary(null)}
                 />
             )}
         </>

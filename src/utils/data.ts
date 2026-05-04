@@ -1,4 +1,4 @@
-import type { Transaction } from './types';
+import type { DebitsForDate, Transaction } from './types';
 
 export function getRowData(row: Element): Transaction | null {
     try {
@@ -41,6 +41,18 @@ export function gatherDebitTransactionsInViewSortedByDate(): Transaction[] {
                 ? a.description.localeCompare(b.description)
                 : dateComparison;
         });
+}
+
+export function gatherDebitsByDate(): DebitsForDate[] {
+    const byDate = new Map<string, Transaction[]>();
+    for (const transaction of gatherDebitTransactionsInViewSortedByDate()) {
+        const list = byDate.get(transaction.date) ?? [];
+        list.push(transaction);
+        byDate.set(transaction.date, list);
+    }
+    return [...byDate.entries()]
+        .map(([date, transactions]) => ({ date, count: transactions.length, transactions }))
+        .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
 }
 
 export function getCurrentBalance(): string | null {
