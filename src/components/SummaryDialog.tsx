@@ -17,6 +17,10 @@ function formatBalance(value: string): string {
     return Number.isFinite(numeric) ? currencyFormatter.format(numeric) : value;
 }
 
+function formatAmount(value: number): string {
+    return currencyFormatter.format(value);
+}
+
 interface SummaryDialogProps {
     currentBalance: string | null;
     availableBalance: string | null;
@@ -91,8 +95,8 @@ export default function SummaryDialog({
                             <div className="flex items-center gap-2">
                                 {currentBalance ? (
                                     <>
-                                        <span className="text-base text-gray-900 before:content-['$']">
-                                            {formatBalance(currentBalance)}
+                                        <span className="text-base text-gray-900">
+                                            ${formatBalance(currentBalance)}
                                         </span>
                                         <CopyButton
                                             label="Copy current balance"
@@ -112,8 +116,8 @@ export default function SummaryDialog({
                             <div className="flex items-center gap-2">
                                 {availableBalance ? (
                                     <>
-                                        <span className="text-base text-gray-900 before:content-['$']">
-                                            {formatBalance(availableBalance)}
+                                        <span className="text-base text-gray-900">
+                                            ${formatBalance(availableBalance)}
                                         </span>
                                         <CopyButton
                                             label="Copy available balance"
@@ -141,6 +145,10 @@ export default function SummaryDialog({
                                     const tsv = entry.transactions
                                         .map((t) => convertTransactionToTSV(t))
                                         .join('\n');
+                                    const total = entry.transactions.reduce(
+                                        (sum, t) => sum + t.amount,
+                                        0,
+                                    );
                                     return (
                                         <li
                                             key={entry.date}
@@ -150,6 +158,9 @@ export default function SummaryDialog({
                                                 {entry.date}
                                             </span>
                                             <div className="flex items-center gap-3">
+                                                <span className="text-sm text-gray-900 font-medium">
+                                                    ${formatAmount(total)}
+                                                </span>
                                                 <span className="text-sm text-gray-600">
                                                     {entry.count}{' '}
                                                     {entry.count === 1

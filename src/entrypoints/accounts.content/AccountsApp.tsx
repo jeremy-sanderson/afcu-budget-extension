@@ -7,13 +7,18 @@ import { useGenerateSummaries } from '../../utils/settings';
 import type { SummaryData } from '../../utils/types';
 import type { FetchAccountDetailsRequest, FetchAccountDetailsResponse } from '../../utils/messages';
 
+type RowView = 'list' | 'tile';
+
 interface DepositRow {
     mount: HTMLElement;
     href: string;
+    view: RowView;
 }
 
 const MOUNT_ATTR = 'data-budget-summary-mount';
 const CELL_ATTR = 'data-budget-summary-cell';
+const TILE_ATTR = 'data-budget-summary-tile';
+const TILE_PREV_POSITION_ATTR = 'data-budget-summary-tile-prev-position';
 
 function findDepositTable(): HTMLTableElement | null {
     const container = document.getElementById('account-lists-container');
@@ -30,7 +35,7 @@ function findDepositTable(): HTMLTableElement | null {
     return null;
 }
 
-function buildMounts(): DepositRow[] {
+function buildListMounts(): DepositRow[] {
     const table = findDepositTable();
     if (!table) return [];
 
@@ -42,7 +47,7 @@ function buildMounts(): DepositRow[] {
 
         const existing = cell.querySelector<HTMLElement>(`[${MOUNT_ATTR}]`);
         if (existing) {
-            rows.push({ mount: existing, href: link.href });
+            rows.push({ mount: existing, href: link.href, view: 'list' });
             continue;
         }
 
@@ -55,7 +60,43 @@ function buildMounts(): DepositRow[] {
         mount.setAttribute(MOUNT_ATTR, '');
         mount.style.display = 'inline-flex';
         cell.prepend(mount);
-        rows.push({ mount, href: link.href });
+        rows.push({ mount, href: link.href, view: 'list' });
+    }
+    return rows;
+}
+
+function buildTileMounts(): DepositRow[] {
+    const container = document.querySelector<HTMLElement>('.account-tiles-container');
+    if (!container) return [];
+
+    const rows: DepositRow[] = [];
+    for (const link of container.querySelectorAll<HTMLAnchorElement>('a.account-tile-link')) {
+        const tile = link.querySelector<HTMLElement>('.account-tile');
+        if (!tile) continue;
+
+        const existing = tile.querySelector<HTMLElement>(`[${MOUNT_ATTR}]`);
+        if (existing) {
+            rows.push({ mount: existing, href: link.href, view: 'tile' });
+            continue;
+        }
+
+        if (!tile.hasAttribute(TILE_ATTR)) {
+            tile.setAttribute(TILE_ATTR, '');
+            const computed = getComputedStyle(tile).position;
+            tile.setAttribute(TILE_PREV_POSITION_ATTR, tile.style.position);
+            if (computed === 'static') {
+                tile.style.position = 'relative';
+            }
+        }
+
+        const mount = document.createElement('span');
+        mount.setAttribute(MOUNT_ATTR, '');
+        mount.style.position = 'absolute';
+        mount.style.top = '6px';
+        mount.style.right = '6px';
+        mount.style.display = 'inline-flex';
+        tile.appendChild(mount);
+        rows.push({ mount, href: link.href, view: 'tile' });
     }
     return rows;
 }
@@ -70,6 +111,16 @@ function clearMounts() {
         cell.style.removeProperty('align-items');
         cell.style.removeProperty('gap');
     }
+    for (const tile of document.querySelectorAll<HTMLElement>(`[${TILE_ATTR}]`)) {
+        const prev = tile.getAttribute(TILE_PREV_POSITION_ATTR) ?? '';
+        if (prev) {
+            tile.style.position = prev;
+        } else {
+            tile.style.removeProperty('position');
+        }
+        tile.removeAttribute(TILE_PREV_POSITION_ATTR);
+        tile.removeAttribute(TILE_ATTR);
+    }
 }
 
 interface SummaryButtonProps {
@@ -81,7 +132,11 @@ function SummaryButton({ onClick, isLoading }: SummaryButtonProps) {
     return (
         <button
             type="button"
-            onClick={onClick}
+            onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onClick();
+            }}
             disabled={isLoading}
             aria-label="Generate summary"
             title="Generate summary"
@@ -143,10 +198,13 @@ export default function AccountsApp() {
     useEffect(() => {
         if (!generateSummaries) return;
 
-        const update = () => setRows(buildMounts());
+        const update = () => setRows([...buildListMounts(), ...buildTileMounts()]);
         update();
 
-        const container = document.getElementById('account-lists-container');
+        const container =
+            document.getElementById('account-presentation-container-disabled') ??
+            document.getElementById('account-lists-container') ??
+            document.querySelector<HTMLElement>('.account-tiles-container');
         if (!container) return;
 
         const observer = new MutationObserver(update);
@@ -187,7 +245,7 @@ export default function AccountsApp() {
                         isLoading={loadingHref === row.href}
                     />,
                     row.mount,
-                    row.href,
+                    `${row.view}:${row.href}`,
                 ),
             )}
             {dialog.dialogState.type === 'alert' && (

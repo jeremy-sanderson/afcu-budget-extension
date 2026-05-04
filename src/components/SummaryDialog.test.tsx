@@ -43,13 +43,27 @@ describe('SummaryDialog', () => {
         );
 
         expect(screen.getByText('Current balance')).toBeInTheDocument();
-        expect(screen.getByText('100.00')).toBeInTheDocument();
+        expect(screen.getByText('$100.00')).toBeInTheDocument();
         expect(screen.getByText('Available balance')).toBeInTheDocument();
-        expect(screen.getByText('80.00')).toBeInTheDocument();
+        expect(screen.getByText('$80.00')).toBeInTheDocument();
         expect(screen.getByText('4/9/2025')).toBeInTheDocument();
         expect(screen.getByText('2 transactions')).toBeInTheDocument();
         expect(screen.getByText('4/12/2025')).toBeInTheDocument();
         expect(screen.getByText('1 transaction')).toBeInTheDocument();
+    });
+
+    it('shows the total dollar amount per date', () => {
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                debitsByDate={sampleDebits}
+                onClose={() => {}}
+            />,
+        );
+
+        expect(screen.getByText('$55.73')).toBeInTheDocument();
+        expect(screen.getByText('$203.07')).toBeInTheDocument();
     });
 
     it('formats balances with thousands separators', () => {
@@ -62,8 +76,8 @@ describe('SummaryDialog', () => {
             />,
         );
 
-        expect(screen.getByText('1,234,567.80')).toBeInTheDocument();
-        expect(screen.getByText('1,000.00')).toBeInTheDocument();
+        expect(screen.getByText('$1,234,567.80')).toBeInTheDocument();
+        expect(screen.getByText('$1,000.00')).toBeInTheDocument();
     });
 
     it('still copies the raw balance string without formatting', async () => {
