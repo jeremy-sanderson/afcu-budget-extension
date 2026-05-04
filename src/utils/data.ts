@@ -1,4 +1,4 @@
-import type { Transaction } from './types';
+import type { DebitsForDate, Transaction } from './types';
 
 export function getRowData(row: Element): Transaction | null {
     try {
@@ -26,12 +26,14 @@ export function convertTransactionToTSV(transaction: Transaction): string {
     return `${transaction.date}\t${transaction.description}\t${transaction.amount}`;
 }
 
-export function getAllRowsInPastTransactionTable(): Element[] {
-    return [...document.querySelectorAll('#PastTransactionsGrid table tbody tr')];
+export function getAllRowsInPastTransactionTable(root: ParentNode = document): Element[] {
+    return [...root.querySelectorAll('#PastTransactionsGrid table tbody tr')];
 }
 
-export function gatherDebitTransactionsInViewSortedByDate(): Transaction[] {
-    return getAllRowsInPastTransactionTable()
+export function gatherDebitTransactionsInViewSortedByDate(
+    root: ParentNode = document,
+): Transaction[] {
+    return getAllRowsInPastTransactionTable(root)
         .map((row) => getRowData(row))
         .filter((t): t is Transaction => t !== null && t.amount < 0)
         .map((t) => ({ ...t, amount: Math.abs(t.amount) }))
@@ -43,8 +45,20 @@ export function gatherDebitTransactionsInViewSortedByDate(): Transaction[] {
         });
 }
 
-export function getCurrentBalance(): string | null {
-    const accountDetails = document.querySelector('div.account-details');
+export function gatherDebitsByDate(root: ParentNode = document): DebitsForDate[] {
+    const byDate = new Map<string, Transaction[]>();
+    for (const transaction of gatherDebitTransactionsInViewSortedByDate(root)) {
+        const list = byDate.get(transaction.date) ?? [];
+        list.push(transaction);
+        byDate.set(transaction.date, list);
+    }
+    return [...byDate.entries()]
+        .map(([date, transactions]) => ({ date, count: transactions.length, transactions }))
+        .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+}
+
+export function getCurrentBalance(root: ParentNode = document): string | null {
+    const accountDetails = root.querySelector('div.account-details');
     if (!accountDetails) return null;
 
     const balanceRow = [...accountDetails.querySelectorAll('.row')].find((row) =>
@@ -58,8 +72,8 @@ export function getCurrentBalance(): string | null {
     return balanceText.replace('$', '').replace(',', '') || null;
 }
 
-export function getAvailableBalance(): string | null {
-    const el = document.querySelector('.primary-label-amount') as HTMLElement | null;
+export function getAvailableBalance(root: ParentNode = document): string | null {
+    const el = root.querySelector('.primary-label-amount') as HTMLElement | null;
     if (!el) return null;
 
     return el.title.replace('$', '').replace(',', '') || null;
