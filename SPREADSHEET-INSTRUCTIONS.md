@@ -75,7 +75,8 @@ four digits of your account for readability.
 
 - Sign into [AFCU][afcu-sign-in]
 - Open the transactions for the checking account by clicking on the Checking account link
-- There is a `Budget` button in the top right corner (this is the extension)
+- There is a `Budgeting` button in the top right corner (this is the extension)
+    - On wide browser viewports (1550px and wider) the menu instead appears auto-expanded as a panel pinned to the left side of the page, so the options below are visible without clicking
     - Clicking it reveals several menu options
         - Debits from Yesterday
             - Copies all debits from yesterday's date to the current date into the paste buffer (like pressing Ctrl+C)
@@ -87,6 +88,8 @@ four digits of your account for readability.
             - Copies the current balance of the account into the paste buffer
         - Available Balance
             - Copies the available balance into the paste buffer - the current balance minus any pending debits
+        - Summary (only shown when `Generate summaries` is enabled in the extension options)
+            - Opens a dialog showing the current balance, available balance, and the debits on the page grouped by date, each with its own copy button so you can copy a single day's debits without re-copying earlier days
 - Copy the current balance for the account into the `Account balance` cell in the spreadsheet
 - Go to the `Debits_AFCU_XXXX` sheet and determine which debits you need copied
     - Count the number of debits on the sheet for the last day recorded
@@ -94,6 +97,10 @@ four digits of your account for readability.
         - For example - if the spreadsheet has 5 debits recorded on 8/1/2025 and the AFCU transaction page also has 5 debits (not counting deposits or refunds) then you should use the `Budget` menu to copy all debits starting from 8/2/2025
     - If the AFCU transactions sheet has more debits than the spreadsheet, then copy from that date and overwrite the debits on the spreadsheet starting with that day
         - For example if the spreadsheet shows 5 debits on 8/1/2025, but the AFCU transactions page shows 10 debits - use the `Budget` menu to copy debits starting on 8/1/2025. Remove the existing debits in the spreadsheet and replace it with all of the debits starting on 8/1/2025
+
+### Per-account summaries from the Accounts page
+
+If you enable `Generate summaries` in the extension options (click the extension's toolbar icon, or open the full options page from there), the extension also adds a small summary icon next to each deposit account on the Accounts overview page. Clicking it fetches that account's transactions in the background and opens the same Summary dialog described above — useful when you want to scan a day's debits for an account without first navigating into its transaction page.
 
 [google-sheet-template]: https://docs.google.com/spreadsheets/d/1_U6l67RL_8QgysgdPo5TCILUEtk0YAcFW0EMWPVUm4A/edit?gid=1006411934#gid=1006411934
 [afcu-sign-in]: https:///www.americafirst.com

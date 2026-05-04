@@ -7,7 +7,8 @@ A Chrome extension that enhances the America First Credit Union (AFCU) banking w
 - Adds copy functionality to transaction data on AFCU banking pages
 - Formats transaction data for easy import into spreadsheets or budgeting applications
 - Works seamlessly with the AFCU banking interface at webaccess45.americafirst.com
--
+- Auto-expanded menu on wide browser viewports — the budgeting menu pins to the left side of the page at 1550px and wider, with no click required to open it
+- Optional account summary view (off by default) that surfaces current/available balances and copyable debits grouped by date, available both from the account details page and as a per-account button on the Accounts page
 
 ## Installation
 
@@ -29,6 +30,14 @@ To update to a newer release, download the new zip, overwrite the contents of th
 Once installed, the extension automatically activates when you visit your AFCU account details page. You'll see additional copy functionality integrated into the banking interface to help you export your transaction data.
 
 There will be a new button in the upper right corner that has several options in it for extracting tab delimited transaction data. It matches the shape of the data found in a google spreadsheet. See [instructions][spreadsheet-instructions-md] here.
+
+On wide browser viewports (1550px and wider), the menu auto-expands as a panel pinned to the left side of the page so all options are visible without clicking. On narrower viewports it stays collapsed as a button in the upper right corner.
+
+### Options
+
+Click the extension's toolbar icon to open the popup, or open the full options page from there. Available settings:
+
+- **Generate summaries** (off by default) — when enabled, adds a `Summary` item to the budgeting menu on the account details page and a summary button next to each deposit account on the Accounts page. The summary shows the current balance, available balance, and debits grouped by date, each with a one-click copy button.
 
 ## Development
 
