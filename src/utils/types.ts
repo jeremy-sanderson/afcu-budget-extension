@@ -9,3 +9,9 @@ export interface DebitsForDate {
     count: number;
     transactions: Transaction[];
 }
+
+export interface SummaryData {
+    currentBalance: string | null;
+    availableBalance: string | null;
+    debitsByDate: DebitsForDate[];
+}
