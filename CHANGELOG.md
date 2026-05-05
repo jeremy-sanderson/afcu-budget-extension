@@ -13,11 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Pop-out icon in the summary dialog that opens a per-date `TransactionsDialog`, listing all transactions on a selected day.
 - Per-row copy button on each line in the transactions dialog, alongside the existing copy-all button.
+- Credits column in the summary dialog: each date row now shows debit and credit totals (with their counts) side-by-side, each with its own copy button.
+- Separate per-date debit and credit pop-out dialogs, so positive transactions can be reviewed and copied independently of debits.
+- Summary buttons on every account in the Accounts page list view (loans, credit cards, etc.), matching the existing tile-view coverage.
 
 ### Changed
 
 - Refactored shared currency and date formatting helpers for reuse across components.
 - Extracted shared `CopyButton` component so the transactions and summary dialogs use the same copy affordance.
+- `SummaryData` now exposes a single `transactionsByDate` field (with grouped `debits` and `credits` per date) in place of the previous debit-only `debitsByDate`.
 
 ## [3.1.0] - 2026-05-04
 

@@ -3,7 +3,7 @@ import {
     getRowData,
     convertTransactionToTSV,
     gatherDebitTransactionsInViewSortedByDate,
-    gatherDebitsByDate,
+    gatherTransactionsByDate,
     getCurrentBalance,
     getAvailableBalance,
 } from './data';
@@ -177,24 +177,33 @@ describe('gatherDebitTransactionsInViewSortedByDate', () => {
     });
 });
 
-describe('gatherDebitsByDate', () => {
+describe('gatherTransactionsByDate', () => {
     beforeEach(() => {
         document.body.innerHTML = '';
     });
 
-    it('groups debits by date with counts and the underlying transactions', () => {
+    it('groups debits and credits by date with positive amounts', () => {
         setupTransactionTable([
             createTransactionRow({ date: '4/9/2025', description: 'GOOGLE', amount: '-$10.73' }),
             createTransactionRow({ date: '4/9/2025', description: 'VENMO', amount: '-$45.00' }),
+            createTransactionRow({ date: '4/9/2025', description: 'PAYCHECK', amount: '$500.00' }),
             createTransactionRow({ date: '4/12/2025', description: 'WALMART', amount: '-$203.07' }),
         ]);
 
-        const result = gatherDebitsByDate();
+        const result = gatherTransactionsByDate();
         expect(result).toHaveLength(2);
-        expect(result[0]).toMatchObject({ date: '4/9/2025', count: 2 });
-        expect(result[0].transactions).toHaveLength(2);
-        expect(result[1]).toMatchObject({ date: '4/12/2025', count: 1 });
-        expect(result[1].transactions[0].description).toBe('WALMART');
+        expect(result[0]).toMatchObject({ date: '4/9/2025' });
+        expect(result[0].debits).toHaveLength(2);
+        expect(result[0].credits).toHaveLength(1);
+        expect(result[0].credits[0]).toEqual({
+            date: '4/9/2025',
+            description: 'PAYCHECK',
+            amount: 500,
+        });
+        expect(result[1]).toMatchObject({ date: '4/12/2025' });
+        expect(result[1].debits[0].description).toBe('WALMART');
+        expect(result[1].debits[0].amount).toBe(203.07);
+        expect(result[1].credits).toEqual([]);
     });
 
     it('sorts groups by date ascending', () => {
@@ -203,25 +212,26 @@ describe('gatherDebitsByDate', () => {
             createTransactionRow({ date: '4/9/2025', description: 'GOOGLE', amount: '-$10.73' }),
         ]);
 
-        const result = gatherDebitsByDate();
+        const result = gatherTransactionsByDate();
         expect(result.map((d) => d.date)).toEqual(['4/9/2025', '4/12/2025']);
     });
 
-    it('excludes credit transactions', () => {
+    it('sorts debits and credits alphabetically by description', () => {
         setupTransactionTable([
-            createTransactionRow({ date: '4/11/2025', description: 'TRANSFER', amount: '$204.00' }),
-            createTransactionRow({ date: '4/11/2025', description: 'AMAZON', amount: '-$25.00' }),
+            createTransactionRow({ date: '4/9/2025', description: 'VENMO', amount: '-$45.00' }),
+            createTransactionRow({ date: '4/9/2025', description: 'GOOGLE', amount: '-$10.73' }),
+            createTransactionRow({ date: '4/9/2025', description: 'REFUND', amount: '$50.00' }),
+            createTransactionRow({ date: '4/9/2025', description: 'BONUS', amount: '$100.00' }),
         ]);
 
-        const result = gatherDebitsByDate();
-        expect(result).toHaveLength(1);
-        expect(result[0].count).toBe(1);
-        expect(result[0].transactions[0].description).toBe('AMAZON');
+        const result = gatherTransactionsByDate();
+        expect(result[0].debits.map((t) => t.description)).toEqual(['GOOGLE', 'VENMO']);
+        expect(result[0].credits.map((t) => t.description)).toEqual(['BONUS', 'REFUND']);
     });
 
-    it('returns an empty array when there are no debits', () => {
+    it('returns an empty array when there are no transactions', () => {
         setupTransactionTable([]);
-        expect(gatherDebitsByDate()).toEqual([]);
+        expect(gatherTransactionsByDate()).toEqual([]);
     });
 });
 

@@ -4,14 +4,14 @@ export interface Transaction {
     amount: number;
 }
 
-export interface DebitsForDate {
+export interface TransactionsForDate {
     date: string;
-    count: number;
-    transactions: Transaction[];
+    debits: Transaction[];
+    credits: Transaction[];
 }
 
 export interface SummaryData {
     currentBalance: string | null;
     availableBalance: string | null;
-    debitsByDate: DebitsForDate[];
+    transactionsByDate: TransactionsForDate[];
 }

@@ -20,47 +20,44 @@ const CELL_ATTR = 'data-budget-summary-cell';
 const TILE_ATTR = 'data-budget-summary-tile';
 const TILE_PREV_POSITION_ATTR = 'data-budget-summary-tile-prev-position';
 
-function findDepositTable(): HTMLTableElement | null {
+function findAccountTables(): HTMLTableElement[] {
     const container = document.getElementById('account-lists-container');
-    if (!container) return null;
+    if (!container) return [];
 
-    for (const heading of container.querySelectorAll('h3')) {
-        if (!heading.textContent?.trim().toLowerCase().includes('deposit')) continue;
-        let sibling = heading.nextElementSibling;
-        while (sibling && sibling.tagName !== 'TABLE') {
-            sibling = sibling.nextElementSibling;
+    const tables: HTMLTableElement[] = [];
+    for (const table of container.querySelectorAll<HTMLTableElement>('table')) {
+        if (table.querySelector('td.column-account-name a.datagrid-link')) {
+            tables.push(table);
         }
-        return sibling instanceof HTMLTableElement ? sibling : null;
     }
-    return null;
+    return tables;
 }
 
 function buildListMounts(): DepositRow[] {
-    const table = findDepositTable();
-    if (!table) return [];
-
     const rows: DepositRow[] = [];
-    for (const tr of table.querySelectorAll<HTMLTableRowElement>('tbody tr')) {
-        const cell = tr.querySelector<HTMLTableCellElement>('td.column-account-name');
-        const link = cell?.querySelector<HTMLAnchorElement>('a.datagrid-link');
-        if (!cell || !link) continue;
+    for (const table of findAccountTables()) {
+        for (const tr of table.querySelectorAll<HTMLTableRowElement>('tbody tr')) {
+            const cell = tr.querySelector<HTMLTableCellElement>('td.column-account-name');
+            const link = cell?.querySelector<HTMLAnchorElement>('a.datagrid-link');
+            if (!cell || !link) continue;
 
-        const existing = cell.querySelector<HTMLElement>(`[${MOUNT_ATTR}]`);
-        if (existing) {
-            rows.push({ mount: existing, href: link.href, view: 'list' });
-            continue;
+            const existing = cell.querySelector<HTMLElement>(`[${MOUNT_ATTR}]`);
+            if (existing) {
+                rows.push({ mount: existing, href: link.href, view: 'list' });
+                continue;
+            }
+
+            cell.setAttribute(CELL_ATTR, '');
+            cell.style.display = 'flex';
+            cell.style.alignItems = 'center';
+            cell.style.gap = '8px';
+
+            const mount = document.createElement('span');
+            mount.setAttribute(MOUNT_ATTR, '');
+            mount.style.display = 'inline-flex';
+            cell.prepend(mount);
+            rows.push({ mount, href: link.href, view: 'list' });
         }
-
-        cell.setAttribute(CELL_ATTR, '');
-        cell.style.display = 'flex';
-        cell.style.alignItems = 'center';
-        cell.style.gap = '8px';
-
-        const mount = document.createElement('span');
-        mount.setAttribute(MOUNT_ATTR, '');
-        mount.style.display = 'inline-flex';
-        cell.prepend(mount);
-        rows.push({ mount, href: link.href, view: 'list' });
     }
     return rows;
 }
@@ -255,7 +252,7 @@ export default function AccountsApp() {
                 <SummaryDialog
                     currentBalance={summary.currentBalance}
                     availableBalance={summary.availableBalance}
-                    debitsByDate={summary.debitsByDate}
+                    transactionsByDate={summary.transactionsByDate}
                     onClose={() => setSummary(null)}
                 />
             )}

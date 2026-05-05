@@ -5,19 +5,37 @@ import { formatAmount } from '../utils/currency';
 import type { Transaction } from '../utils/types';
 import CopyButton from './CopyButton';
 
+export type TransactionKind = 'debit' | 'credit';
+
 interface TransactionsDialogProps {
     date: string;
+    kind: TransactionKind;
     transactions: Transaction[];
     onClose: () => void;
 }
 
+const LABELS: Record<TransactionKind, { title: string; empty: string; pluralCopy: string }> = {
+    debit: {
+        title: 'Debits',
+        empty: 'No debits for this date.',
+        pluralCopy: 'debits',
+    },
+    credit: {
+        title: 'Credits',
+        empty: 'No credits for this date.',
+        pluralCopy: 'credits',
+    },
+};
+
 export default function TransactionsDialog({
     date,
+    kind,
     transactions,
     onClose,
 }: TransactionsDialogProps) {
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
     const total = transactions.reduce((sum, t) => sum + t.amount, 0);
+    const labels = LABELS[kind];
 
     const copy = (key: string, text: string) => {
         navigator.clipboard
@@ -45,11 +63,11 @@ export default function TransactionsDialog({
                 <Dialog.Content className="rounded-lg p-6 min-w-[400px] max-w-[80%] max-h-[80vh] overflow-y-auto shadow-lg bg-white">
                     <div className="flex items-center justify-between gap-3 mb-4">
                         <Dialog.Title className="text-lg font-semibold text-gray-900">
-                            Transactions on {date}
+                            {labels.title} on {date}
                         </Dialog.Title>
                         {transactions.length > 0 && (
                             <CopyButton
-                                label={`Copy all transactions for ${date}`}
+                                label={`Copy all ${labels.pluralCopy} for ${date}`}
                                 isCopied={copiedKey === 'all'}
                                 onClick={copyAll}
                             />
@@ -57,9 +75,7 @@ export default function TransactionsDialog({
                     </div>
 
                     {transactions.length === 0 ? (
-                        <p className="text-sm text-gray-500 italic">
-                            No transactions for this date.
-                        </p>
+                        <p className="text-sm text-gray-500 italic">{labels.empty}</p>
                     ) : (
                         <ul className="divide-y divide-gray-200 border border-gray-200 rounded">
                             {transactions.map((t, i) => {
