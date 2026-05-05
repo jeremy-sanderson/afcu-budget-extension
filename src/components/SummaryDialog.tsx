@@ -3,8 +3,7 @@ import { Dialog } from '@ark-ui/react';
 import { convertTransactionToTSV } from '../utils/data';
 import { formatAmount, formatBalance } from '../utils/currency';
 import type { DebitsForDate } from '../utils/types';
-import CopyIcon from './CopyIcon';
-import CheckIcon from './CheckIcon';
+import CopyButton from './CopyButton';
 import PopOutIcon from './PopOutIcon';
 import TransactionsDialog from './TransactionsDialog';
 
@@ -15,26 +14,6 @@ interface SummaryDialogProps {
     availableBalance: string | null;
     debitsByDate: DebitsForDate[];
     onClose: () => void;
-}
-
-interface CopyButtonProps {
-    label: string;
-    isCopied: boolean;
-    onClick: () => void;
-}
-
-function CopyButton({ label, isCopied, onClick }: CopyButtonProps) {
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            aria-label={label}
-            title={label}
-            className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-600 bg-transparent border-none cursor-pointer hover:bg-gray-100 hover:text-[#00548e]"
-        >
-            {isCopied ? <CheckIcon /> : <CopyIcon />}
-        </button>
-    );
 }
 
 export default function SummaryDialog({

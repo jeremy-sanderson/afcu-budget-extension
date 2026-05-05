@@ -68,7 +68,7 @@ describe('TransactionsDialog', () => {
         expect(screen.queryByText('Total')).not.toBeInTheDocument();
     });
 
-    it('copies all transactions as TSV when the copy button is clicked', async () => {
+    it('copies all transactions as TSV when the copy-all button is clicked', async () => {
         render(
             <TransactionsDialog
                 date="4/9/2025"
@@ -84,7 +84,36 @@ describe('TransactionsDialog', () => {
         expect(mockWriteText).toHaveBeenCalledWith('4/9/2025\tGOOGLE\t10.73\n4/9/2025\tVENMO\t45');
     });
 
-    it('does not render the copy button when there are no transactions', () => {
+    it('copies a single transaction as TSV when its row copy button is clicked', async () => {
+        render(
+            <TransactionsDialog
+                date="4/9/2025"
+                transactions={sampleTransactions}
+                onClose={() => {}}
+            />,
+        );
+
+        await act(async () => {
+            fireEvent.click(screen.getByLabelText('Copy VENMO'));
+        });
+
+        expect(mockWriteText).toHaveBeenCalledWith('4/9/2025\tVENMO\t45');
+    });
+
+    it('renders a copy button for every transaction row', () => {
+        render(
+            <TransactionsDialog
+                date="4/9/2025"
+                transactions={sampleTransactions}
+                onClose={() => {}}
+            />,
+        );
+
+        expect(screen.getByLabelText('Copy GOOGLE')).toBeInTheDocument();
+        expect(screen.getByLabelText('Copy VENMO')).toBeInTheDocument();
+    });
+
+    it('does not render any copy buttons when there are no transactions', () => {
         render(<TransactionsDialog date="4/9/2025" transactions={[]} onClose={() => {}} />);
 
         expect(

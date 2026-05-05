@@ -12,10 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Pop-out icon in the summary dialog that opens a per-date `TransactionsDialog`, listing all transactions on a selected day.
+- Per-row copy button on each line in the transactions dialog, alongside the existing copy-all button.
 
 ### Changed
 
 - Refactored shared currency and date formatting helpers for reuse across components.
+- Extracted shared `CopyButton` component so the transactions and summary dialogs use the same copy affordance.
 
 ## [3.1.0] - 2026-05-04
 

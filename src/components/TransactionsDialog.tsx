@@ -3,8 +3,7 @@ import { Dialog } from '@ark-ui/react';
 import { convertTransactionToTSV } from '../utils/data';
 import { formatAmount } from '../utils/currency';
 import type { Transaction } from '../utils/types';
-import CopyIcon from './CopyIcon';
-import CheckIcon from './CheckIcon';
+import CopyButton from './CopyButton';
 
 interface TransactionsDialogProps {
     date: string;
@@ -17,20 +16,26 @@ export default function TransactionsDialog({
     transactions,
     onClose,
 }: TransactionsDialogProps) {
-    const [isCopied, setIsCopied] = useState(false);
+    const [copiedKey, setCopiedKey] = useState<string | null>(null);
     const total = transactions.reduce((sum, t) => sum + t.amount, 0);
 
-    const copyAll = () => {
-        const tsv = transactions.map((t) => convertTransactionToTSV(t)).join('\n');
+    const copy = (key: string, text: string) => {
         navigator.clipboard
-            .writeText(tsv)
+            .writeText(text)
             .then(() => {
-                setIsCopied(true);
-                setTimeout(() => setIsCopied(false), 1500);
+                setCopiedKey(key);
+                setTimeout(() => {
+                    setCopiedKey((current) => (current === key ? null : current));
+                }, 1500);
             })
             .catch((error) => {
                 console.error('Error copying to clipboard:', error);
             });
+    };
+
+    const copyAll = () => {
+        const tsv = transactions.map((t) => convertTransactionToTSV(t)).join('\n');
+        copy('all', tsv);
     };
 
     return (
@@ -43,15 +48,11 @@ export default function TransactionsDialog({
                             Transactions on {date}
                         </Dialog.Title>
                         {transactions.length > 0 && (
-                            <button
-                                type="button"
+                            <CopyButton
+                                label={`Copy all transactions for ${date}`}
+                                isCopied={copiedKey === 'all'}
                                 onClick={copyAll}
-                                aria-label={`Copy all transactions for ${date}`}
-                                title={`Copy all transactions for ${date}`}
-                                className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-600 bg-transparent border-none cursor-pointer hover:bg-gray-100 hover:text-[#00548e]"
-                            >
-                                {isCopied ? <CheckIcon /> : <CopyIcon />}
-                            </button>
+                            />
                         )}
                     </div>
 
@@ -61,19 +62,31 @@ export default function TransactionsDialog({
                         </p>
                     ) : (
                         <ul className="divide-y divide-gray-200 border border-gray-200 rounded">
-                            {transactions.map((t, i) => (
-                                <li
-                                    key={`${t.date}-${t.description}-${i}`}
-                                    className="flex items-center justify-between gap-3 px-3 py-2"
-                                >
-                                    <span className="text-sm text-gray-900 break-words">
-                                        {t.description}
-                                    </span>
-                                    <span className="text-sm text-gray-900 font-medium whitespace-nowrap">
-                                        ${formatAmount(t.amount)}
-                                    </span>
-                                </li>
-                            ))}
+                            {transactions.map((t, i) => {
+                                const key = `row-${i}`;
+                                return (
+                                    <li
+                                        key={`${t.date}-${t.description}-${i}`}
+                                        className="flex items-center justify-between gap-3 px-3 py-2"
+                                    >
+                                        <span className="text-sm text-gray-900 break-words">
+                                            {t.description}
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-gray-900 font-medium whitespace-nowrap">
+                                                ${formatAmount(t.amount)}
+                                            </span>
+                                            <CopyButton
+                                                label={`Copy ${t.description}`}
+                                                isCopied={copiedKey === key}
+                                                onClick={() =>
+                                                    copy(key, convertTransactionToTSV(t))
+                                                }
+                                            />
+                                        </div>
+                                    </li>
+                                );
+                            })}
                         </ul>
                     )}
 
