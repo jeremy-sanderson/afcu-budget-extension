@@ -4,6 +4,8 @@ import { convertTransactionToTSV } from '../utils/data';
 import type { DebitsForDate } from '../utils/types';
 import CopyIcon from './CopyIcon';
 import CheckIcon from './CheckIcon';
+import PopOutIcon from './PopOutIcon';
+import TransactionsDialog from './TransactionsDialog';
 
 const DATES_PAGE_SIZE = 5;
 
@@ -56,6 +58,7 @@ export default function SummaryDialog({
 }: SummaryDialogProps) {
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
     const [visibleDateCount, setVisibleDateCount] = useState(DATES_PAGE_SIZE);
+    const [detailsDate, setDetailsDate] = useState<string | null>(null);
 
     const debitsNewestFirst = useMemo(
         () => [...debitsByDate].sort((a, b) => Date.parse(b.date) - Date.parse(a.date)),
@@ -167,6 +170,15 @@ export default function SummaryDialog({
                                                         ? 'transaction'
                                                         : 'transactions'}
                                                 </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setDetailsDate(entry.date)}
+                                                    aria-label={`View transactions for ${entry.date}`}
+                                                    title={`View transactions for ${entry.date}`}
+                                                    className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-600 bg-transparent border-none cursor-pointer hover:bg-gray-100 hover:text-[#00548e]"
+                                                >
+                                                    <PopOutIcon />
+                                                </button>
                                                 <CopyButton
                                                     label={`Copy debits from ${entry.date}`}
                                                     isCopied={copiedKey === key}
@@ -198,6 +210,18 @@ export default function SummaryDialog({
                     </div>
                 </Dialog.Content>
             </Dialog.Positioner>
+            {detailsDate &&
+                (() => {
+                    const entry = debitsNewestFirst.find((d) => d.date === detailsDate);
+                    if (!entry) return null;
+                    return (
+                        <TransactionsDialog
+                            date={entry.date}
+                            transactions={entry.transactions}
+                            onClose={() => setDetailsDate(null)}
+                        />
+                    );
+                })()}
         </Dialog.Root>
     );
 }

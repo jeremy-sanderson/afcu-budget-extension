@@ -238,6 +238,44 @@ describe('SummaryDialog', () => {
         expect(screen.queryByRole('button', { name: /Load \d+ more/ })).not.toBeInTheDocument();
     });
 
+    it('opens the transactions dialog when the pop-out button is clicked', async () => {
+        const user = userEvent.setup();
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                debitsByDate={sampleDebits}
+                onClose={() => {}}
+            />,
+        );
+
+        await user.click(screen.getByLabelText('View transactions for 4/9/2025'));
+
+        expect(screen.getByText('Transactions on 4/9/2025')).toBeInTheDocument();
+        expect(screen.getByText('GOOGLE')).toBeInTheDocument();
+        expect(screen.getByText('VENMO')).toBeInTheDocument();
+    });
+
+    it('closes the transactions dialog when its Close button is clicked', async () => {
+        const user = userEvent.setup();
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                debitsByDate={sampleDebits}
+                onClose={() => {}}
+            />,
+        );
+
+        await user.click(screen.getByLabelText('View transactions for 4/9/2025'));
+        expect(screen.getByText('Transactions on 4/9/2025')).toBeInTheDocument();
+
+        const closeButtons = screen.getAllByText('Close');
+        await user.click(closeButtons[closeButtons.length - 1]);
+
+        expect(screen.queryByText('Transactions on 4/9/2025')).not.toBeInTheDocument();
+    });
+
     it('calls onClose when Close button is clicked', async () => {
         const user = userEvent.setup();
         const onClose = vi.fn();
