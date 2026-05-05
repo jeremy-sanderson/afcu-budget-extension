@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Dialog } from '@ark-ui/react';
 import { convertTransactionToTSV } from '../utils/data';
+import { formatAmount, formatBalance } from '../utils/currency';
 import type { DebitsForDate } from '../utils/types';
 import CopyIcon from './CopyIcon';
 import CheckIcon from './CheckIcon';
@@ -8,20 +9,6 @@ import PopOutIcon from './PopOutIcon';
 import TransactionsDialog from './TransactionsDialog';
 
 const DATES_PAGE_SIZE = 5;
-
-const currencyFormatter = new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-});
-
-function formatBalance(value: string): string {
-    const numeric = Number(value);
-    return Number.isFinite(numeric) ? currencyFormatter.format(numeric) : value;
-}
-
-function formatAmount(value: number): string {
-    return currencyFormatter.format(value);
-}
 
 interface SummaryDialogProps {
     currentBalance: string | null;

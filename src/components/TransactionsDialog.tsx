@@ -1,18 +1,10 @@
 import { useState } from 'react';
 import { Dialog } from '@ark-ui/react';
 import { convertTransactionToTSV } from '../utils/data';
+import { formatAmount } from '../utils/currency';
 import type { Transaction } from '../utils/types';
 import CopyIcon from './CopyIcon';
 import CheckIcon from './CheckIcon';
-
-const currencyFormatter = new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-});
-
-function formatAmount(value: number): string {
-    return currencyFormatter.format(value);
-}
 
 interface TransactionsDialogProps {
     date: string;
