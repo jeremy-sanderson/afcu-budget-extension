@@ -78,4 +78,8 @@ jobs:
 
                       > Chrome will display a "disable developer mode extensions" banner on startup while this extension is loaded. That's expected for unpacked extensions.
 
+                      ### What's in this release
+
+                      See the [CHANGELOG](https://github.com/${{ github.repository }}/blob/v${{ steps.version.outputs.current }}/CHANGELOG.md) for a description of the changes in this version, and the full history of prior releases.
+
                       ---

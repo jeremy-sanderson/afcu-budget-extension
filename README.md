@@ -25,6 +25,8 @@ To update to a newer release, download the new zip, overwrite the contents of th
 
 > Chrome will display a "disable developer mode extensions" banner on startup while this extension is loaded. That's expected for unpacked extensions.
 
+For a list of changes in each version, see the [CHANGELOG][changelog].
+
 ## Usage
 
 Once installed, the extension automatically activates when you visit your AFCU account details page. You'll see additional copy functionality integrated into the banking interface to help you export your transaction data.
@@ -54,5 +56,6 @@ Built with WXT + React + Tailwind CSS 4, rendering inside a Shadow DOM for style
 Icons by: [Icon by FACH][icon-attribution]
 
 [releases]: https://github.com/jeremy-sanderson/afcu-budget-extension/releases
+[changelog]: CHANGELOG.md
 [spreadsheet-instructions-md]: SPREADSHEET-INSTRUCTIONS.md
 [icon-attribution]: https://www.freepik.com/icon/financial_15769437#fromView=keyword&page=1&position=0&uuid=3adade23-a318-4da1-abc2-90e263724313
