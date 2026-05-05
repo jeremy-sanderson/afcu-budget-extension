@@ -8,15 +8,9 @@ import AlertDialog from '../../components/AlertDialog';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import PromptDialog from '../../components/PromptDialog';
 import SummaryDialog from '../../components/SummaryDialog';
-import { gatherDebitsByDate, getAvailableBalance, getCurrentBalance } from '../../utils/data';
-import type { DebitsForDate } from '../../utils/types';
+import { gatherTransactionsByDate, getAvailableBalance, getCurrentBalance } from '../../utils/data';
+import type { SummaryData } from '../../utils/types';
 import { useGenerateSummaries } from '../../utils/settings';
-
-interface SummaryData {
-    currentBalance: string | null;
-    availableBalance: string | null;
-    debitsByDate: DebitsForDate[];
-}
 
 export default function App() {
     const dialog = useDialog();
@@ -29,7 +23,7 @@ export default function App() {
         setSummary({
             currentBalance: getCurrentBalance(),
             availableBalance: getAvailableBalance(),
-            debitsByDate: gatherDebitsByDate(),
+            transactionsByDate: gatherTransactionsByDate(),
         });
     };
 
@@ -87,7 +81,7 @@ export default function App() {
                 <SummaryDialog
                     currentBalance={summary.currentBalance}
                     availableBalance={summary.availableBalance}
-                    debitsByDate={summary.debitsByDate}
+                    transactionsByDate={summary.transactionsByDate}
                     onClose={() => setSummary(null)}
                 />
             )}

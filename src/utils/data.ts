@@ -1,4 +1,4 @@
-import type { DebitsForDate, Transaction } from './types';
+import type { Transaction, TransactionsForDate } from './types';
 
 export function getRowData(row: Element): Transaction | null {
     try {
@@ -45,15 +45,29 @@ export function gatherDebitTransactionsInViewSortedByDate(
         });
 }
 
-export function gatherDebitsByDate(root: ParentNode = document): DebitsForDate[] {
-    const byDate = new Map<string, Transaction[]>();
-    for (const transaction of gatherDebitTransactionsInViewSortedByDate(root)) {
-        const list = byDate.get(transaction.date) ?? [];
-        list.push(transaction);
-        byDate.set(transaction.date, list);
+function sortByDescription(transactions: Transaction[]): Transaction[] {
+    return [...transactions].sort((a, b) => a.description.localeCompare(b.description));
+}
+
+export function gatherTransactionsByDate(root: ParentNode = document): TransactionsForDate[] {
+    const byDate = new Map<string, { debits: Transaction[]; credits: Transaction[] }>();
+    for (const row of getAllRowsInPastTransactionTable(root)) {
+        const data = getRowData(row);
+        if (!data) continue;
+        const entry = byDate.get(data.date) ?? { debits: [], credits: [] };
+        if (data.amount < 0) {
+            entry.debits.push({ ...data, amount: Math.abs(data.amount) });
+        } else if (data.amount > 0) {
+            entry.credits.push(data);
+        }
+        byDate.set(data.date, entry);
     }
     return [...byDate.entries()]
-        .map(([date, transactions]) => ({ date, count: transactions.length, transactions }))
+        .map(([date, { debits, credits }]) => ({
+            date,
+            debits: sortByDescription(debits),
+            credits: sortByDescription(credits),
+        }))
         .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
 }
 

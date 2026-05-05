@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { act, render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SummaryDialog from './SummaryDialog';
-import type { DebitsForDate } from '../utils/types';
+import type { TransactionsForDate } from '../utils/types';
 
 const mockWriteText = vi.fn().mockResolvedValue(undefined);
 
@@ -15,29 +15,29 @@ beforeEach(() => {
     });
 });
 
-const sampleDebits: DebitsForDate[] = [
+const sampleByDate: TransactionsForDate[] = [
     {
         date: '4/9/2025',
-        count: 2,
-        transactions: [
+        debits: [
             { date: '4/9/2025', description: 'GOOGLE', amount: 10.73 },
             { date: '4/9/2025', description: 'VENMO', amount: 45 },
         ],
+        credits: [{ date: '4/9/2025', description: 'PAYCHECK', amount: 500 }],
     },
     {
         date: '4/12/2025',
-        count: 1,
-        transactions: [{ date: '4/12/2025', description: 'WALMART', amount: 203.07 }],
+        debits: [{ date: '4/12/2025', description: 'WALMART', amount: 203.07 }],
+        credits: [],
     },
 ];
 
 describe('SummaryDialog', () => {
-    it('renders both balances and per-date counts', () => {
+    it('renders both balances and per-date debit and credit totals', () => {
         render(
             <SummaryDialog
                 currentBalance="100.00"
                 availableBalance="80.00"
-                debitsByDate={sampleDebits}
+                transactionsByDate={sampleByDate}
                 onClose={() => {}}
             />,
         );
@@ -47,23 +47,24 @@ describe('SummaryDialog', () => {
         expect(screen.getByText('Available balance')).toBeInTheDocument();
         expect(screen.getByText('$80.00')).toBeInTheDocument();
         expect(screen.getByText('4/9/2025')).toBeInTheDocument();
-        expect(screen.getByText('2 transactions')).toBeInTheDocument();
         expect(screen.getByText('4/12/2025')).toBeInTheDocument();
-        expect(screen.getByText('1 transaction')).toBeInTheDocument();
+        expect(screen.getByText('$55.73')).toBeInTheDocument();
+        expect(screen.getByText('$500.00')).toBeInTheDocument();
+        expect(screen.getByText('$203.07')).toBeInTheDocument();
     });
 
-    it('shows the total dollar amount per date', () => {
+    it('renders Debits and Credits column headers', () => {
         render(
             <SummaryDialog
                 currentBalance={null}
                 availableBalance={null}
-                debitsByDate={sampleDebits}
+                transactionsByDate={sampleByDate}
                 onClose={() => {}}
             />,
         );
 
-        expect(screen.getByText('$55.73')).toBeInTheDocument();
-        expect(screen.getByText('$203.07')).toBeInTheDocument();
+        expect(screen.getByText('Debits')).toBeInTheDocument();
+        expect(screen.getByText('Credits')).toBeInTheDocument();
     });
 
     it('formats balances with thousands separators', () => {
@@ -71,7 +72,7 @@ describe('SummaryDialog', () => {
             <SummaryDialog
                 currentBalance="1234567.8"
                 availableBalance="1000"
-                debitsByDate={[]}
+                transactionsByDate={[]}
                 onClose={() => {}}
             />,
         );
@@ -85,7 +86,7 @@ describe('SummaryDialog', () => {
             <SummaryDialog
                 currentBalance="1234567.8"
                 availableBalance="1000"
-                debitsByDate={[]}
+                transactionsByDate={[]}
                 onClose={() => {}}
             />,
         );
@@ -101,7 +102,7 @@ describe('SummaryDialog', () => {
             <SummaryDialog
                 currentBalance="100.00"
                 availableBalance="80.00"
-                debitsByDate={[]}
+                transactionsByDate={[]}
                 onClose={() => {}}
             />,
         );
@@ -117,7 +118,7 @@ describe('SummaryDialog', () => {
             <SummaryDialog
                 currentBalance="100.00"
                 availableBalance="80.00"
-                debitsByDate={sampleDebits}
+                transactionsByDate={sampleByDate}
                 onClose={() => {}}
             />,
         );
@@ -128,17 +129,47 @@ describe('SummaryDialog', () => {
         expect(mockWriteText).toHaveBeenCalledWith('4/9/2025\tGOOGLE\t10.73\n4/9/2025\tVENMO\t45');
     });
 
-    it('shows an empty state when there are no debits', () => {
+    it('copies the day credits as TSV', async () => {
         render(
             <SummaryDialog
-                currentBalance={null}
-                availableBalance={null}
-                debitsByDate={[]}
+                currentBalance="100.00"
+                availableBalance="80.00"
+                transactionsByDate={sampleByDate}
                 onClose={() => {}}
             />,
         );
 
-        expect(screen.getByText('No debit transactions on this page.')).toBeInTheDocument();
+        await act(async () => {
+            fireEvent.click(screen.getByLabelText('Copy credits from 4/9/2025'));
+        });
+        expect(mockWriteText).toHaveBeenCalledWith('4/9/2025\tPAYCHECK\t500');
+    });
+
+    it('hides the credit copy button when a date has no credits', () => {
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={sampleByDate}
+                onClose={() => {}}
+            />,
+        );
+
+        expect(screen.queryByLabelText('Copy credits from 4/12/2025')).not.toBeInTheDocument();
+        expect(screen.getByLabelText('Copy debits from 4/12/2025')).toBeInTheDocument();
+    });
+
+    it('shows an empty state when there are no transactions', () => {
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={[]}
+                onClose={() => {}}
+            />,
+        );
+
+        expect(screen.getByText('No transactions on this page.')).toBeInTheDocument();
     });
 
     it('hides the copy button when a balance is missing', () => {
@@ -146,7 +177,7 @@ describe('SummaryDialog', () => {
             <SummaryDialog
                 currentBalance={null}
                 availableBalance="80.00"
-                debitsByDate={[]}
+                transactionsByDate={[]}
                 onClose={() => {}}
             />,
         );
@@ -155,12 +186,12 @@ describe('SummaryDialog', () => {
         expect(screen.getByLabelText('Copy available balance')).toBeInTheDocument();
     });
 
-    it('orders debit dates newest first', () => {
+    it('orders dates newest first', () => {
         render(
             <SummaryDialog
                 currentBalance={null}
                 availableBalance={null}
-                debitsByDate={sampleDebits}
+                transactionsByDate={sampleByDate}
                 onClose={() => {}}
             />,
         );
@@ -170,12 +201,12 @@ describe('SummaryDialog', () => {
     });
 
     it('shows only the 5 most recent dates and a Load more button', () => {
-        const sevenDays: DebitsForDate[] = Array.from({ length: 7 }, (_, i) => {
+        const sevenDays: TransactionsForDate[] = Array.from({ length: 7 }, (_, i) => {
             const date = `4/${i + 1}/2025`;
             return {
                 date,
-                count: 1,
-                transactions: [{ date, description: 'X', amount: 1 }],
+                debits: [{ date, description: 'X', amount: 1 }],
+                credits: [],
             };
         });
 
@@ -183,7 +214,7 @@ describe('SummaryDialog', () => {
             <SummaryDialog
                 currentBalance={null}
                 availableBalance={null}
-                debitsByDate={sevenDays}
+                transactionsByDate={sevenDays}
                 onClose={() => {}}
             />,
         );
@@ -200,12 +231,12 @@ describe('SummaryDialog', () => {
     });
 
     it('loads the next page of dates when Load more is clicked', () => {
-        const sevenDays: DebitsForDate[] = Array.from({ length: 7 }, (_, i) => {
+        const sevenDays: TransactionsForDate[] = Array.from({ length: 7 }, (_, i) => {
             const date = `4/${i + 1}/2025`;
             return {
                 date,
-                count: 1,
-                transactions: [{ date, description: 'X', amount: 1 }],
+                debits: [{ date, description: 'X', amount: 1 }],
+                credits: [],
             };
         });
 
@@ -213,7 +244,7 @@ describe('SummaryDialog', () => {
             <SummaryDialog
                 currentBalance={null}
                 availableBalance={null}
-                debitsByDate={sevenDays}
+                transactionsByDate={sevenDays}
                 onClose={() => {}}
             />,
         );
@@ -230,12 +261,83 @@ describe('SummaryDialog', () => {
             <SummaryDialog
                 currentBalance={null}
                 availableBalance={null}
-                debitsByDate={sampleDebits}
+                transactionsByDate={sampleByDate}
                 onClose={() => {}}
             />,
         );
 
         expect(screen.queryByRole('button', { name: /Load \d+ more/ })).not.toBeInTheDocument();
+    });
+
+    it('opens a debit-only dialog when the debit pop-out is clicked', async () => {
+        const user = userEvent.setup();
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={sampleByDate}
+                onClose={() => {}}
+            />,
+        );
+
+        await user.click(screen.getByLabelText('View debits for 4/9/2025'));
+
+        expect(screen.getByText('Debits on 4/9/2025')).toBeInTheDocument();
+        expect(screen.getByText('GOOGLE')).toBeInTheDocument();
+        expect(screen.getByText('VENMO')).toBeInTheDocument();
+        expect(screen.queryByText('PAYCHECK')).not.toBeInTheDocument();
+    });
+
+    it('opens a credit-only dialog when the credit pop-out is clicked', async () => {
+        const user = userEvent.setup();
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={sampleByDate}
+                onClose={() => {}}
+            />,
+        );
+
+        await user.click(screen.getByLabelText('View credits for 4/9/2025'));
+
+        expect(screen.getByText('Credits on 4/9/2025')).toBeInTheDocument();
+        expect(screen.getByText('PAYCHECK')).toBeInTheDocument();
+        expect(screen.queryByText('GOOGLE')).not.toBeInTheDocument();
+    });
+
+    it('does not render a credit pop-out when a date has no credits', () => {
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={sampleByDate}
+                onClose={() => {}}
+            />,
+        );
+
+        expect(screen.queryByLabelText('View credits for 4/12/2025')).not.toBeInTheDocument();
+        expect(screen.getByLabelText('View debits for 4/12/2025')).toBeInTheDocument();
+    });
+
+    it('closes the debit dialog when its Close button is clicked', async () => {
+        const user = userEvent.setup();
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={sampleByDate}
+                onClose={() => {}}
+            />,
+        );
+
+        await user.click(screen.getByLabelText('View debits for 4/9/2025'));
+        expect(screen.getByText('Debits on 4/9/2025')).toBeInTheDocument();
+
+        const closeButtons = screen.getAllByText('Close');
+        await user.click(closeButtons[closeButtons.length - 1]);
+
+        expect(screen.queryByText('Debits on 4/9/2025')).not.toBeInTheDocument();
     });
 
     it('calls onClose when Close button is clicked', async () => {
@@ -245,7 +347,7 @@ describe('SummaryDialog', () => {
             <SummaryDialog
                 currentBalance="100.00"
                 availableBalance="80.00"
-                debitsByDate={[]}
+                transactionsByDate={[]}
                 onClose={onClose}
             />,
         );
