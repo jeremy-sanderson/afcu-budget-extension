@@ -123,11 +123,11 @@ export default function SummaryDialog({
                         </p>
                     ) : (
                         <>
-                            <ul className="divide-y divide-gray-200 border border-gray-200 rounded">
-                                <li className="grid grid-cols-[minmax(80px,auto)_1fr_1fr] items-center gap-3 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            <ul className="grid grid-cols-[minmax(80px,auto)_minmax(0,1fr)_auto_auto_minmax(0,1fr)_auto_auto] gap-x-3 divide-y divide-gray-200 border border-gray-200 rounded">
+                                <li className="col-span-7 grid grid-cols-subgrid items-center px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
                                     <span>Date</span>
-                                    <span>Debits</span>
-                                    <span>Credits</span>
+                                    <span className="col-span-3">Debits</span>
+                                    <span className="col-span-3">Credits</span>
                                 </li>
                                 {visibleEntries.map((entry) => {
                                     const debitKey = `debits-${entry.date}`;
@@ -139,79 +139,81 @@ export default function SummaryDialog({
                                     return (
                                         <li
                                             key={entry.date}
-                                            className="grid grid-cols-[minmax(80px,auto)_1fr_1fr] items-center gap-3 px-3 py-2"
+                                            className="col-span-7 grid grid-cols-subgrid items-center px-3 py-2"
                                         >
                                             <span className="text-sm text-gray-900">
                                                 {entry.date}
                                             </span>
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                {entry.debits.length === 0 ? (
-                                                    <span className="text-sm text-gray-400">—</span>
-                                                ) : (
-                                                    <>
-                                                        <span className="text-sm text-gray-900 font-medium whitespace-nowrap">
+                                            {entry.debits.length === 0 ? (
+                                                <span className="col-span-3 text-sm text-gray-400">
+                                                    —
+                                                </span>
+                                            ) : (
+                                                <>
+                                                    <span className="text-sm text-gray-900 whitespace-nowrap">
+                                                        <span className="font-medium">
                                                             ${formatAmount(debitTotal)}
                                                         </span>
-                                                        <span className="text-xs text-gray-600 whitespace-nowrap">
+                                                        <span className="text-xs text-gray-600 ml-1">
                                                             ({entry.debits.length})
                                                         </span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setDetails({
-                                                                    date: entry.date,
-                                                                    kind: 'debit',
-                                                                })
-                                                            }
-                                                            aria-label={`View debits for ${entry.date}`}
-                                                            title={`View debits for ${entry.date}`}
-                                                            className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-600 bg-transparent border-none cursor-pointer hover:bg-gray-100 hover:text-[#00548e]"
-                                                        >
-                                                            <PopOutIcon />
-                                                        </button>
-                                                        <CopyButton
-                                                            label={`Copy debits from ${entry.date}`}
-                                                            isCopied={copiedKey === debitKey}
-                                                            onClick={() => copy(debitKey, debitTsv)}
-                                                        />
-                                                    </>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                {entry.credits.length === 0 ? (
-                                                    <span className="text-sm text-gray-400">—</span>
-                                                ) : (
-                                                    <>
-                                                        <span className="text-sm text-gray-900 font-medium whitespace-nowrap">
+                                                    </span>
+                                                    <CopyButton
+                                                        label={`Copy debits from ${entry.date}`}
+                                                        isCopied={copiedKey === debitKey}
+                                                        onClick={() => copy(debitKey, debitTsv)}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setDetails({
+                                                                date: entry.date,
+                                                                kind: 'debit',
+                                                            })
+                                                        }
+                                                        aria-label={`View debits for ${entry.date}`}
+                                                        title={`View debits for ${entry.date}`}
+                                                        className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-600 bg-transparent border-none cursor-pointer hover:bg-gray-100 hover:text-[#00548e]"
+                                                    >
+                                                        <PopOutIcon />
+                                                    </button>
+                                                </>
+                                            )}
+                                            {entry.credits.length === 0 ? (
+                                                <span className="col-span-3 text-sm text-gray-400">
+                                                    —
+                                                </span>
+                                            ) : (
+                                                <>
+                                                    <span className="text-sm text-gray-900 whitespace-nowrap">
+                                                        <span className="font-medium">
                                                             ${formatAmount(creditTotal)}
                                                         </span>
-                                                        <span className="text-xs text-gray-600 whitespace-nowrap">
+                                                        <span className="text-xs text-gray-600 ml-1">
                                                             ({entry.credits.length})
                                                         </span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setDetails({
-                                                                    date: entry.date,
-                                                                    kind: 'credit',
-                                                                })
-                                                            }
-                                                            aria-label={`View credits for ${entry.date}`}
-                                                            title={`View credits for ${entry.date}`}
-                                                            className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-600 bg-transparent border-none cursor-pointer hover:bg-gray-100 hover:text-[#00548e]"
-                                                        >
-                                                            <PopOutIcon />
-                                                        </button>
-                                                        <CopyButton
-                                                            label={`Copy credits from ${entry.date}`}
-                                                            isCopied={copiedKey === creditKey}
-                                                            onClick={() =>
-                                                                copy(creditKey, creditTsv)
-                                                            }
-                                                        />
-                                                    </>
-                                                )}
-                                            </div>
+                                                    </span>
+                                                    <CopyButton
+                                                        label={`Copy credits from ${entry.date}`}
+                                                        isCopied={copiedKey === creditKey}
+                                                        onClick={() => copy(creditKey, creditTsv)}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setDetails({
+                                                                date: entry.date,
+                                                                kind: 'credit',
+                                                            })
+                                                        }
+                                                        aria-label={`View credits for ${entry.date}`}
+                                                        title={`View credits for ${entry.date}`}
+                                                        className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-600 bg-transparent border-none cursor-pointer hover:bg-gray-100 hover:text-[#00548e]"
+                                                    >
+                                                        <PopOutIcon />
+                                                    </button>
+                                                </>
+                                            )}
                                         </li>
                                     );
                                 })}
