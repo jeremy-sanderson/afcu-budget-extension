@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-05-06
+
+### Added
+
+- Account description (e.g. `Checking ****3858`) shown next to the "Summary" heading in the summary dialog.
+- Copy buttons in the **Debits** and **Credits** column headers of the summary dialog that copy all currently shown transactions for that column as TSV.
+
 ## [3.3.0] - 2026-05-06
 
 ### Added
@@ -105,7 +112,8 @@ Initial tagged release of the pure-JavaScript content script.
 - Sample HTML snapshot of the AFCU page for local testing.
 - `README.md` documentation and spreadsheet usage instructions.
 
-[Unreleased]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.3.0...HEAD
+[Unreleased]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.4.0...HEAD
+[3.4.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.3.0...v3.4.0
 [3.3.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.0.0...v3.1.0

@@ -13,6 +13,7 @@ interface SummaryDialogProps {
     currentBalance: string | null;
     availableBalance: string | null;
     transactionsByDate: TransactionsForDate[];
+    accountDescription?: string | null;
     accountUrl?: string;
     onClose: () => void;
 }
@@ -34,6 +35,7 @@ export default function SummaryDialog({
     currentBalance,
     availableBalance,
     transactionsByDate,
+    accountDescription,
     accountUrl,
     onClose,
 }: SummaryDialogProps) {
@@ -47,6 +49,9 @@ export default function SummaryDialog({
     );
     const visibleEntries = transactionsNewestFirst.slice(0, visibleDateCount);
     const remainingCount = transactionsNewestFirst.length - visibleEntries.length;
+
+    const visibleDebits = visibleEntries.flatMap((entry) => entry.debits);
+    const visibleCredits = visibleEntries.flatMap((entry) => entry.credits);
 
     const copy = (key: string, text: string) => {
         navigator.clipboard
@@ -68,7 +73,14 @@ export default function SummaryDialog({
             <Dialog.Positioner className="fixed inset-0 flex items-center justify-center">
                 <Dialog.Content className="rounded-lg p-6 min-w-[400px] max-w-[80%] max-h-[80vh] overflow-y-auto shadow-lg bg-white">
                     <Dialog.Title className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <span>Summary</span>
+                        <span>
+                            Summary
+                            {accountDescription && (
+                                <span className="ml-2 font-normal text-gray-600">
+                                    {accountDescription}
+                                </span>
+                            )}
+                        </span>
                         {accountUrl && (
                             <a
                                 href={accountUrl}
@@ -140,8 +152,30 @@ export default function SummaryDialog({
                             <ul className="grid grid-cols-[minmax(80px,auto)_minmax(0,1fr)_auto_auto_minmax(0,1fr)_auto_auto] gap-x-3 divide-y divide-gray-200 border border-gray-200 rounded">
                                 <li className="col-span-7 grid grid-cols-subgrid items-center px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
                                     <span>Date</span>
-                                    <span className="col-span-3">Debits</span>
-                                    <span className="col-span-3">Credits</span>
+                                    <span className="col-span-3 inline-flex items-center gap-1">
+                                        <span>Debits</span>
+                                        {visibleDebits.length > 0 && (
+                                            <CopyButton
+                                                label="Copy all visible debits"
+                                                isCopied={copiedKey === 'all-debits'}
+                                                onClick={() =>
+                                                    copy('all-debits', tsvFor(visibleDebits))
+                                                }
+                                            />
+                                        )}
+                                    </span>
+                                    <span className="col-span-3 inline-flex items-center gap-1">
+                                        <span>Credits</span>
+                                        {visibleCredits.length > 0 && (
+                                            <CopyButton
+                                                label="Copy all visible credits"
+                                                isCopied={copiedKey === 'all-credits'}
+                                                onClick={() =>
+                                                    copy('all-credits', tsvFor(visibleCredits))
+                                                }
+                                            />
+                                        )}
+                                    </span>
                                 </li>
                                 {visibleEntries.map((entry) => {
                                     const debitKey = `debits-${entry.date}`;

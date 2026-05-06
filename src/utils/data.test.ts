@@ -6,6 +6,7 @@ import {
     gatherTransactionsByDate,
     getCurrentBalance,
     getAvailableBalance,
+    getAccountDescription,
 } from './data';
 
 function createTransactionRow({
@@ -304,5 +305,30 @@ describe('getAvailableBalance', () => {
             <div class="primary-label-amount" title="$1,036.00"></div>
         `;
         expect(getAvailableBalance()).toBe('1036.00');
+    });
+});
+
+describe('getAccountDescription', () => {
+    beforeEach(() => {
+        document.body.innerHTML = '';
+    });
+
+    it('combines account name and number', () => {
+        document.body.innerHTML = `
+            <div class="account-name">Checking</div>
+            <div class="account-number">****3858</div>
+        `;
+        expect(getAccountDescription()).toBe('Checking ****3858');
+    });
+
+    it('returns just the name when number is missing', () => {
+        document.body.innerHTML = `
+            <div class="account-name">Checking</div>
+        `;
+        expect(getAccountDescription()).toBe('Checking');
+    });
+
+    it('returns null when both are missing', () => {
+        expect(getAccountDescription()).toBeNull();
     });
 });

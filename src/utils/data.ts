@@ -92,3 +92,10 @@ export function getAvailableBalance(root: ParentNode = document): string | null 
 
     return el.title.replace('$', '').replace(',', '') || null;
 }
+
+export function getAccountDescription(root: ParentNode = document): string | null {
+    const name = root.querySelector('.account-name')?.textContent?.trim() ?? '';
+    const number = root.querySelector('.account-number')?.textContent?.trim() ?? '';
+    const description = [name, number].filter(Boolean).join(' ');
+    return description || null;
+}

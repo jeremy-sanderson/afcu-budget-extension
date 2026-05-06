@@ -253,6 +253,7 @@ export default function AccountsApp() {
                     currentBalance={summary.data.currentBalance}
                     availableBalance={summary.data.availableBalance}
                     transactionsByDate={summary.data.transactionsByDate}
+                    accountDescription={summary.data.accountDescription}
                     accountUrl={summary.href}
                     onClose={() => setSummary(null)}
                 />

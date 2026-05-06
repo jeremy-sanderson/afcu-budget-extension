@@ -14,4 +14,5 @@ export interface SummaryData {
     currentBalance: string | null;
     availableBalance: string | null;
     transactionsByDate: TransactionsForDate[];
+    accountDescription: string | null;
 }

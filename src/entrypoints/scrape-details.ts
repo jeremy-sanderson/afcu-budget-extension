@@ -1,4 +1,9 @@
-import { gatherTransactionsByDate, getAvailableBalance, getCurrentBalance } from '../utils/data';
+import {
+    gatherTransactionsByDate,
+    getAccountDescription,
+    getAvailableBalance,
+    getCurrentBalance,
+} from '../utils/data';
 import type { SummaryData } from '../utils/types';
 
 const TIMEOUT_MS = 15000;
@@ -36,6 +41,7 @@ async function scrape(): Promise<ScrapeResult> {
         currentBalance: getCurrentBalance(),
         availableBalance: getAvailableBalance(),
         transactionsByDate: gatherTransactionsByDate(),
+        accountDescription: getAccountDescription(),
     };
 }
 

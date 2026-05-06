@@ -8,7 +8,12 @@ import AlertDialog from '../../components/AlertDialog';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import PromptDialog from '../../components/PromptDialog';
 import SummaryDialog from '../../components/SummaryDialog';
-import { gatherTransactionsByDate, getAvailableBalance, getCurrentBalance } from '../../utils/data';
+import {
+    gatherTransactionsByDate,
+    getAccountDescription,
+    getAvailableBalance,
+    getCurrentBalance,
+} from '../../utils/data';
 import type { SummaryData } from '../../utils/types';
 import { useGenerateSummaries } from '../../utils/settings';
 
@@ -24,6 +29,7 @@ export default function App() {
             currentBalance: getCurrentBalance(),
             availableBalance: getAvailableBalance(),
             transactionsByDate: gatherTransactionsByDate(),
+            accountDescription: getAccountDescription(),
         });
     };
 
@@ -82,6 +88,7 @@ export default function App() {
                     currentBalance={summary.currentBalance}
                     availableBalance={summary.availableBalance}
                     transactionsByDate={summary.transactionsByDate}
+                    accountDescription={summary.accountDescription}
                     onClose={() => setSummary(null)}
                 />
             )}

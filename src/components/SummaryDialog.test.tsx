@@ -355,4 +355,114 @@ describe('SummaryDialog', () => {
         await user.click(screen.getByText('Close'));
         expect(onClose).toHaveBeenCalled();
     });
+
+    it('renders the account description next to the Summary title', () => {
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={[]}
+                accountDescription="Checking ****3858"
+                onClose={() => {}}
+            />,
+        );
+
+        expect(screen.getByText('Checking ****3858')).toBeInTheDocument();
+    });
+
+    it('omits the account description when none is provided', () => {
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={[]}
+                onClose={() => {}}
+            />,
+        );
+
+        expect(screen.queryByText(/\*\*\*\*/)).not.toBeInTheDocument();
+    });
+
+    it('copies all visible debits as TSV from the column header', async () => {
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={sampleByDate}
+                onClose={() => {}}
+            />,
+        );
+
+        await act(async () => {
+            fireEvent.click(screen.getByLabelText('Copy all visible debits'));
+        });
+        expect(mockWriteText).toHaveBeenCalledWith(
+            '4/12/2025\tWALMART\t203.07\n4/9/2025\tGOOGLE\t10.73\n4/9/2025\tVENMO\t45',
+        );
+    });
+
+    it('copies all visible credits as TSV from the column header', async () => {
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={sampleByDate}
+                onClose={() => {}}
+            />,
+        );
+
+        await act(async () => {
+            fireEvent.click(screen.getByLabelText('Copy all visible credits'));
+        });
+        expect(mockWriteText).toHaveBeenCalledWith('4/9/2025\tPAYCHECK\t500');
+    });
+
+    it('limits the column-header debit copy to currently shown dates', async () => {
+        const sevenDays: TransactionsForDate[] = Array.from({ length: 7 }, (_, i) => {
+            const date = `4/${i + 1}/2025`;
+            return {
+                date,
+                debits: [{ date, description: `D${i + 1}`, amount: i + 1 }],
+                credits: [],
+            };
+        });
+
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={sevenDays}
+                onClose={() => {}}
+            />,
+        );
+
+        await act(async () => {
+            fireEvent.click(screen.getByLabelText('Copy all visible debits'));
+        });
+        expect(mockWriteText).toHaveBeenCalledWith(
+            '4/7/2025\tD7\t7\n4/6/2025\tD6\t6\n4/5/2025\tD5\t5\n4/4/2025\tD4\t4\n4/3/2025\tD3\t3',
+        );
+    });
+
+    it('hides the column-header debit copy when no debits are visible', () => {
+        const creditsOnly: TransactionsForDate[] = [
+            {
+                date: '4/9/2025',
+                debits: [],
+                credits: [{ date: '4/9/2025', description: 'PAYCHECK', amount: 500 }],
+            },
+        ];
+
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={creditsOnly}
+                onClose={() => {}}
+            />,
+        );
+
+        expect(screen.queryByLabelText('Copy all visible debits')).not.toBeInTheDocument();
+        expect(screen.getByLabelText('Copy all visible credits')).toBeInTheDocument();
+    });
 });
