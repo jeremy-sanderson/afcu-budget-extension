@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-05-06
+
+### Added
+
+- Pop-out icon next to the "Summary" heading in the summary dialog (Accounts page) that opens the underlying account-details page in a new tab.
+
 ## [3.2.0] - 2026-05-05
 
 ### Added
@@ -99,7 +105,8 @@ Initial tagged release of the pure-JavaScript content script.
 - Sample HTML snapshot of the AFCU page for local testing.
 - `README.md` documentation and spreadsheet usage instructions.
 
-[Unreleased]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.3.0...HEAD
+[3.3.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v2.1.0...v3.0.0

@@ -189,7 +189,7 @@ export default function AccountsApp() {
     const dialog = useDialog();
     const [generateSummaries] = useGenerateSummaries();
     const [rows, setRows] = useState<DepositRow[]>([]);
-    const [summary, setSummary] = useState<SummaryData | null>(null);
+    const [summary, setSummary] = useState<{ data: SummaryData; href: string } | null>(null);
     const [loadingHref, setLoadingHref] = useState<string | null>(null);
 
     useEffect(() => {
@@ -218,7 +218,7 @@ export default function AccountsApp() {
         setLoadingHref(href);
         try {
             const data = await fetchSummary(href);
-            setSummary(data);
+            setSummary({ data, href });
         } catch (error) {
             console.error('Error fetching account details:', error);
             dialog.showAlert(
@@ -250,9 +250,10 @@ export default function AccountsApp() {
             )}
             {summary && (
                 <SummaryDialog
-                    currentBalance={summary.currentBalance}
-                    availableBalance={summary.availableBalance}
-                    transactionsByDate={summary.transactionsByDate}
+                    currentBalance={summary.data.currentBalance}
+                    availableBalance={summary.data.availableBalance}
+                    transactionsByDate={summary.data.transactionsByDate}
+                    accountUrl={summary.href}
                     onClose={() => setSummary(null)}
                 />
             )}

@@ -13,6 +13,7 @@ interface SummaryDialogProps {
     currentBalance: string | null;
     availableBalance: string | null;
     transactionsByDate: TransactionsForDate[];
+    accountUrl?: string;
     onClose: () => void;
 }
 
@@ -33,6 +34,7 @@ export default function SummaryDialog({
     currentBalance,
     availableBalance,
     transactionsByDate,
+    accountUrl,
     onClose,
 }: SummaryDialogProps) {
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -65,8 +67,20 @@ export default function SummaryDialog({
             <Dialog.Backdrop className="fixed inset-0 bg-black/50" />
             <Dialog.Positioner className="fixed inset-0 flex items-center justify-center">
                 <Dialog.Content className="rounded-lg p-6 min-w-[400px] max-w-[80%] max-h-[80vh] overflow-y-auto shadow-lg bg-white">
-                    <Dialog.Title className="text-lg font-semibold text-gray-900 mb-4">
-                        Summary
+                    <Dialog.Title className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <span>Summary</span>
+                        {accountUrl && (
+                            <a
+                                href={accountUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Open account details in new tab"
+                                title="Open account details in new tab"
+                                className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-600 hover:bg-gray-100 hover:text-[#00548e]"
+                            >
+                                <PopOutIcon />
+                            </a>
+                        )}
                     </Dialog.Title>
 
                     <div className="space-y-2 mb-5">
