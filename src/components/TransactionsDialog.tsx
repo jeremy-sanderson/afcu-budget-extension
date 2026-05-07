@@ -77,13 +77,18 @@ export default function TransactionsDialog({
                     {transactions.length === 0 ? (
                         <p className="text-sm text-gray-500 italic">{labels.empty}</p>
                     ) : (
-                        <ul className="divide-y divide-gray-200 border border-gray-200 rounded">
+                        <ul className="divide-y divide-gray-200 border border-gray-200 rounded overflow-hidden">
+                            <li className="flex items-center justify-between gap-3 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-600 bg-gray-200">
+                                <span>Description</span>
+                                <span>Amount</span>
+                            </li>
                             {transactions.map((t, i) => {
                                 const key = `row-${i}`;
+                                const rowBg = i % 2 === 0 ? 'bg-white' : 'bg-gray-50';
                                 return (
                                     <li
                                         key={`${t.date}-${t.description}-${i}`}
-                                        className="flex items-center justify-between gap-3 px-3 py-2"
+                                        className={`flex items-center justify-between gap-3 px-3 py-2 ${rowBg}`}
                                     >
                                         <span className="text-sm text-gray-900 break-words">
                                             {t.description}

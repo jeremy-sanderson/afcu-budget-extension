@@ -149,8 +149,8 @@ export default function SummaryDialog({
                         </p>
                     ) : (
                         <>
-                            <ul className="grid grid-cols-[minmax(80px,auto)_minmax(0,1fr)_auto_auto_minmax(0,1fr)_auto_auto] gap-x-3 divide-y divide-gray-200 border border-gray-200 rounded">
-                                <li className="col-span-7 grid grid-cols-subgrid items-center px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            <ul className="grid grid-cols-[minmax(80px,auto)_minmax(0,1fr)_auto_auto_minmax(0,1fr)_auto_auto] gap-x-3 divide-y divide-gray-200 border border-gray-200 rounded overflow-hidden">
+                                <li className="col-span-7 grid grid-cols-subgrid items-center px-3 py-2 text-xs font-semibold uppercase tracking-wide text-gray-600 bg-gray-200">
                                     <span>Date</span>
                                     <span className="col-span-3 inline-flex items-center gap-1">
                                         <span>Debits</span>
@@ -177,17 +177,18 @@ export default function SummaryDialog({
                                         )}
                                     </span>
                                 </li>
-                                {visibleEntries.map((entry) => {
+                                {visibleEntries.map((entry, index) => {
                                     const debitKey = `debits-${entry.date}`;
                                     const creditKey = `credits-${entry.date}`;
                                     const debitTotal = sumAmounts(entry.debits);
                                     const creditTotal = sumAmounts(entry.credits);
                                     const debitTsv = tsvFor(entry.debits);
                                     const creditTsv = tsvFor(entry.credits);
+                                    const rowBg = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
                                     return (
                                         <li
                                             key={entry.date}
-                                            className="col-span-7 grid grid-cols-subgrid items-center px-3 py-2"
+                                            className={`col-span-7 grid grid-cols-subgrid items-center px-3 py-2 ${rowBg}`}
                                         >
                                             <span className="text-sm text-gray-900">
                                                 {entry.date}
