@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.7.0] - 2026-08-20
+
+### Added
+
+- "Debug logging" option (Options page) that enables diagnostic console messages for troubleshooting; off by default.
+
 ## [3.6.0] - 2026-08-20
 
 ### Changed

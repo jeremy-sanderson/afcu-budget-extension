@@ -5,25 +5,39 @@ export const generateSummariesSetting = storage.defineItem<boolean>('sync:genera
     fallback: false,
 });
 
-export function useGenerateSummaries(): [boolean, (value: boolean) => Promise<void>] {
+export const debugLoggingSetting = storage.defineItem<boolean>('sync:debugLogging', {
+    fallback: false,
+});
+
+function useStorageSetting(
+    setting: typeof generateSummariesSetting,
+): [boolean, (value: boolean) => Promise<void>] {
     const [value, setValue] = useState(false);
 
     useEffect(() => {
         let active = true;
-        generateSummariesSetting.getValue().then((stored) => {
+        setting.getValue().then((stored) => {
             if (active) setValue(stored);
         });
-        const unwatch = generateSummariesSetting.watch((next) => setValue(next));
+        const unwatch = setting.watch((next) => setValue(next));
         return () => {
             active = false;
             unwatch();
         };
-    }, []);
+    }, [setting]);
 
     const update = async (next: boolean) => {
-        await generateSummariesSetting.setValue(next);
+        await setting.setValue(next);
         setValue(next);
     };
 
     return [value, update];
+}
+
+export function useGenerateSummaries(): [boolean, (value: boolean) => Promise<void>] {
+    return useStorageSetting(generateSummariesSetting);
+}
+
+export function useDebugLogging(): [boolean, (value: boolean) => Promise<void>] {
+    return useStorageSetting(debugLoggingSetting);
 }
