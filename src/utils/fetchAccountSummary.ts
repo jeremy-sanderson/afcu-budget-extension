@@ -4,8 +4,7 @@ import type { SummaryData } from './types';
 export async function fetchAccountSummary(url: string): Promise<SummaryData> {
     const request: FetchAccountDetailsRequest = { type: 'fetchAccountDetails', url };
     const response = (await browser.runtime.sendMessage(request)) as
-        | FetchAccountDetailsResponse
-        | undefined;
+        FetchAccountDetailsResponse | undefined;
     if (!response || !response.ok) {
         throw new Error(response?.error ?? 'No response from background');
     }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import BudgetMenu from './BudgetMenu';
 
@@ -53,11 +53,18 @@ describe('BudgetMenu', () => {
     });
 
     it('menu item onClick fires when clicked', async () => {
-        const user = userEvent.setup();
         render(<BudgetMenu items={mockItems} />);
 
-        await user.click(screen.getByText('Budgeting'));
-        await user.click(screen.getByText('Current Balance'));
-        expect(mockItems[2].onClick).toHaveBeenCalled();
+        // Ark UI's menu machine processes events via queueMicrotask, so pointerdown and
+        // click need a real tick between them (userEvent.click's built-in sequencing isn't
+        // enough) and the resulting onSelect callback must be awaited via waitFor.
+        fireEvent.click(screen.getByText('Budgeting'));
+        const item = screen.getByText('Current Balance');
+        await act(async () => {
+            fireEvent.pointerDown(item);
+            await new Promise((r) => setTimeout(r, 0));
+        });
+        fireEvent.click(item);
+        await waitFor(() => expect(mockItems[2].onClick).toHaveBeenCalled());
     });
 });
