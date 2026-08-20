@@ -6,5 +6,4 @@ export interface FetchAccountDetailsRequest {
 }
 
 export type FetchAccountDetailsResponse =
-    | { ok: true; data: SummaryData }
-    | { ok: false; error: string };
+    { ok: true; data: SummaryData } | { ok: false; error: string };
