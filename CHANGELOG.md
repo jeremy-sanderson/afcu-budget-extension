@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.0] - 2026-08-20
+
+### Fixed
+
+- Dialogs (Summary, Transactions, Alert, Confirm, Prompt) had no explicit `z-index`, so on the new portal they rendered behind the page's own positioned elements instead of on top. Backdrop and Positioner now match the `BudgetMenu`/`BudgetPanel` stacking level.
+
 ## [3.7.0] - 2026-08-20
 
 ### Added

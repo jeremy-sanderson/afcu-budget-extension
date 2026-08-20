@@ -58,8 +58,8 @@ export default function TransactionsDialog({
 
     return (
         <Dialog.Root open={true} onOpenChange={(e) => !e.open && onClose()}>
-            <Dialog.Backdrop className="fixed inset-0 bg-black/50" />
-            <Dialog.Positioner className="fixed inset-0 flex items-center justify-center">
+            <Dialog.Backdrop className="fixed inset-0 z-[99999] bg-black/50" />
+            <Dialog.Positioner className="fixed inset-0 z-[99999] flex items-center justify-center">
                 <Dialog.Content className="rounded-lg p-6 min-w-[400px] max-w-[80%] max-h-[80vh] overflow-y-auto shadow-lg bg-white">
                     <div className="flex items-center justify-between gap-3 mb-4">
                         <Dialog.Title className="text-lg font-semibold text-gray-900">
