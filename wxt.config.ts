@@ -8,7 +8,11 @@ export default defineConfig({
         name: 'AFCU Budget (beta)',
         description: 'Clipboard functionality for AFCU banking website budgeting',
         permissions: ['clipboardWrite', 'storage', 'tabs', 'scripting'],
-        host_permissions: ['https://webaccess45.americafirst.com/*'],
+        host_permissions: [
+            'https://webaccess45.americafirst.com/*',
+            'https://digital.americafirst.com',
+            'https://sdk-cdn.onlineaccess1.com/*',
+        ],
     },
     vite: () => ({
         plugins: [tailwindcss()],

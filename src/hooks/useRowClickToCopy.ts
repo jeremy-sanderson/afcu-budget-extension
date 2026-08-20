@@ -4,6 +4,7 @@ import {
     getRowData,
     convertTransactionToTSV,
 } from '../utils/data';
+import { AccountDetails } from '../utils/selectors';
 
 const HANDLED_ATTR = 'data-click-to-copy';
 const RED_100 = '#fee2e2';
@@ -48,7 +49,7 @@ export default function useRowClickToCopy() {
     useEffect(() => {
         setupRowClickHandlers();
 
-        const grid = document.querySelector('#PastTransactionsGrid');
+        const grid = document.querySelector(AccountDetails.transactionList);
         if (!grid) return;
 
         const observer = new MutationObserver(() => {

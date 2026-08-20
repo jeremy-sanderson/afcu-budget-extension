@@ -4,6 +4,7 @@ import {
     getAvailableBalance,
     getCurrentBalance,
 } from '../utils/data';
+import { AccountDetails } from '../utils/selectors';
 import type { SummaryData } from '../utils/types';
 
 const TIMEOUT_MS = 15000;
@@ -22,20 +23,21 @@ async function waitFor(predicate: () => boolean, deadline: number): Promise<bool
 async function scrape(): Promise<ScrapeResult> {
     const deadline = Date.now() + TIMEOUT_MS;
 
-    const gridFound = await waitFor(
-        () => document.querySelector('#PastTransactionsGrid') !== null,
+    const listFound = await waitFor(
+        () => document.querySelector(AccountDetails.transactionList) !== null,
         deadline,
     );
-    if (!gridFound) {
-        return { error: 'Past transactions grid not found' };
+    if (!listFound) {
+        return { error: 'Transaction list not found' };
     }
 
-    await waitFor(() => {
-        const grid = document.querySelector('#PastTransactionsGrid');
-        if (!grid) return false;
-        if (grid.querySelector('.k-loading-mask')) return false;
-        return (grid.querySelector('table tbody tr') ?? null) !== null;
-    }, deadline);
+    await waitFor(
+        () =>
+            document.querySelectorAll(
+                `${AccountDetails.transactionList} ${AccountDetails.transactionRow}`,
+            ).length > 0,
+        deadline,
+    );
 
     return {
         currentBalance: getCurrentBalance(),

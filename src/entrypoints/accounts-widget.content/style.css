@@ -1,0 +1,21 @@
+@import 'tailwindcss';
+
+/* AFCU sets html { font-size: 10px }, which breaks all rem-based
+   Tailwind sizes inside this Shadow DOM. Override with px values. */
+@theme {
+    --text-xs: 12px;
+    --text-xs--line-height: 16px;
+    --text-sm: 14px;
+    --text-sm--line-height: 20px;
+    --text-base: 16px;
+    --text-base--line-height: 24px;
+    --text-lg: 18px;
+    --text-lg--line-height: 28px;
+    --text-xl: 20px;
+    --text-xl--line-height: 28px;
+}
+
+:host {
+    font-size: 16px;
+    line-height: 1.5;
+}
