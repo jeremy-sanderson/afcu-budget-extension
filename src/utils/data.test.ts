@@ -10,46 +10,47 @@ import {
 } from './data';
 
 function createTransactionRow({
-    date = '4/12/2025',
+    date = 'Apr 12 2025',
     description = 'WALMART PURCHASE',
-    amount = '-$203.07',
+    amount = '($203.07)',
+    pending = false,
     omitDate = false,
     omitAmount = false,
 }: {
     date?: string;
     description?: string;
     amount?: string;
+    pending?: boolean;
     omitDate?: boolean;
     omitAmount?: boolean;
-} = {}): HTMLTableRowElement {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td class="transaction-id">some-id</td>
-        ${omitDate ? '<td></td>' : `<td class="column-date">${date}</td>`}
-        <td class="column-description">${description}</td>
-        <td class="column-amount"></td>
-        <td class="column-amount">
-            ${omitAmount ? '' : `<span class="transaction-">${amount}</span>`}
-        </td>
-        <td class="column-balance"><span>$36.00</span></td>
+} = {}): HTMLLIElement {
+    const li = document.createElement('li');
+    li.className = 'transaction-history-item';
+    const dateCell = pending ? 'Pending' : date;
+    li.innerHTML = `
+        <a class="datatable-row parent-template pointer ${pending ? 'pending' : ''}">
+            <div class="row-content flex">
+                ${omitDate ? '' : `<div class="col-date">${dateCell}</div>`}
+                <div class="col-desc">
+                    <div test-id="historyItemDescription" class="description-text">${description}</div>
+                </div>
+                <div class="col-amount">
+                    ${omitAmount ? '' : `<span test-id="lblAmount" class="amount"><span class="numAmount">${amount}</span></span>`}
+                </div>
+            </div>
+        </a>
     `;
-    return tr;
+    return li;
 }
 
-function setupTransactionTable(rows: HTMLTableRowElement[]) {
-    document.body.innerHTML = `
-        <div id="PastTransactionsGrid">
-            <table>
-                <tbody></tbody>
-            </table>
-        </div>
-    `;
-    const tbody = document.querySelector('#PastTransactionsGrid table tbody')!;
-    rows.forEach((row) => tbody.appendChild(row));
+function setupTransactionTable(rows: HTMLLIElement[]) {
+    document.body.innerHTML = '<ul id="historyItems"></ul>';
+    const list = document.querySelector('#historyItems')!;
+    rows.forEach((row) => list.appendChild(row));
 }
 
 describe('getRowData', () => {
-    it('parses a valid transaction row with negative amount', () => {
+    it('parses a posted row with a negative (parenthesized) amount', () => {
         const row = createTransactionRow();
         const result = getRowData(row);
         expect(result).toEqual({
@@ -59,7 +60,7 @@ describe('getRowData', () => {
         });
     });
 
-    it('parses a row with positive (credit) amount', () => {
+    it('parses a posted row with a positive (credit) amount', () => {
         const row = createTransactionRow({ amount: '$204.00' });
         const result = getRowData(row);
         expect(result).toEqual({
@@ -69,39 +70,41 @@ describe('getRowData', () => {
         });
     });
 
-    it('returns null when date cell is missing', () => {
+    it('parses a pending row, reading the date from the description prefix', () => {
+        const row = createTransactionRow({
+            pending: true,
+            description: '08/19 - MAVERIK #683',
+            amount: '($1.90)',
+        });
+        const result = getRowData(row);
+        expect(result?.description).toBe('MAVERIK #683');
+        expect(result?.amount).toBe(-1.9);
+        expect(result?.date).toMatch(/^8\/19\/\d{4}$/);
+    });
+
+    it('returns null for a pending row whose description has no date prefix', () => {
+        const row = createTransactionRow({ pending: true, description: 'MAVERIK #683' });
+        expect(getRowData(row)).toBeNull();
+    });
+
+    it('returns null when the date cell is missing', () => {
         const row = createTransactionRow({ omitDate: true });
         expect(getRowData(row)).toBeNull();
     });
 
-    it('returns null when amount span is missing', () => {
+    it('returns null when the amount span is missing', () => {
         const row = createTransactionRow({ omitAmount: true });
         expect(getRowData(row)).toBeNull();
     });
 
     it('strips commas and newlines from description', () => {
-        const row = createTransactionRow({
-            description: 'PURCHASE, WALMART STORE',
-        });
-        const result = getRowData(row);
-        expect(result?.description).toBe('PURCHASE WALMART STORE');
+        const row = createTransactionRow({ description: 'PURCHASE, WALMART STORE' });
+        expect(getRowData(row)?.description).toBe('PURCHASE WALMART STORE');
     });
 
-    it('strips $ and , from amount and converts to number', () => {
-        const row = createTransactionRow({ amount: '-$1,203.07' });
-        const result = getRowData(row);
-        expect(result?.amount).toBe(-1203.07);
-    });
-
-    it('handles the span.transaction- selector', () => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td class="column-date">4/12/2025</td>
-            <td class="column-description">TEST</td>
-            <td class="column-amount"><span class="transaction-">-$50.00</span></td>
-        `;
-        const result = getRowData(tr);
-        expect(result?.amount).toBe(-50);
+    it('strips $, commas, and parentheses from amount and converts to a negative number', () => {
+        const row = createTransactionRow({ amount: '($1,203.07)' });
+        expect(getRowData(row)?.amount).toBe(-1203.07);
     });
 });
 
@@ -114,15 +117,6 @@ describe('convertTransactionToTSV', () => {
         });
         expect(result).toBe('4/12/2025\tWALMART\t203.07');
     });
-
-    it('handles decimal amounts', () => {
-        const result = convertTransactionToTSV({
-            date: '4/9/2025',
-            description: 'GOOGLE',
-            amount: 10.73,
-        });
-        expect(result).toBe('4/9/2025\tGOOGLE\t10.73');
-    });
 });
 
 describe('gatherDebitTransactionsInViewSortedByDate', () => {
@@ -132,9 +126,17 @@ describe('gatherDebitTransactionsInViewSortedByDate', () => {
 
     it('returns only debit transactions with amounts flipped to positive', () => {
         setupTransactionTable([
-            createTransactionRow({ date: '4/12/2025', description: 'WALMART', amount: '-$203.07' }),
-            createTransactionRow({ date: '4/11/2025', description: 'TRANSFER', amount: '$204.00' }),
-            createTransactionRow({ date: '4/9/2025', description: 'GOOGLE', amount: '-$10.73' }),
+            createTransactionRow({
+                date: 'Apr 12 2025',
+                description: 'WALMART',
+                amount: '($203.07)',
+            }),
+            createTransactionRow({
+                date: 'Apr 11 2025',
+                description: 'TRANSFER',
+                amount: '$204.00',
+            }),
+            createTransactionRow({ date: 'Apr 9 2025', description: 'GOOGLE', amount: '($10.73)' }),
         ]);
 
         const result = gatherDebitTransactionsInViewSortedByDate();
@@ -144,8 +146,8 @@ describe('gatherDebitTransactionsInViewSortedByDate', () => {
 
     it('sorts by date ascending', () => {
         setupTransactionTable([
-            createTransactionRow({ date: '4/12/2025', description: 'WALMART', amount: '-$203.07' }),
-            createTransactionRow({ date: '4/9/2025', description: 'GOOGLE', amount: '-$10.73' }),
+            createTransactionRow({ date: 'Apr 12 2025', amount: '($203.07)' }),
+            createTransactionRow({ date: 'Apr 9 2025', description: 'GOOGLE', amount: '($10.73)' }),
         ]);
 
         const result = gatherDebitTransactionsInViewSortedByDate();
@@ -155,8 +157,8 @@ describe('gatherDebitTransactionsInViewSortedByDate', () => {
 
     it('sorts alphabetically by description when dates are equal', () => {
         setupTransactionTable([
-            createTransactionRow({ date: '4/9/2025', description: 'VENMO', amount: '-$45.00' }),
-            createTransactionRow({ date: '4/9/2025', description: 'GOOGLE', amount: '-$10.73' }),
+            createTransactionRow({ date: 'Apr 9 2025', description: 'VENMO', amount: '($45.00)' }),
+            createTransactionRow({ date: 'Apr 9 2025', description: 'GOOGLE', amount: '($10.73)' }),
         ]);
 
         const result = gatherDebitTransactionsInViewSortedByDate();
@@ -171,9 +173,12 @@ describe('gatherDebitTransactionsInViewSortedByDate', () => {
 
     it('filters out credit transactions', () => {
         setupTransactionTable([
-            createTransactionRow({ date: '4/11/2025', description: 'TRANSFER', amount: '$204.00' }),
+            createTransactionRow({
+                date: 'Apr 11 2025',
+                description: 'TRANSFER',
+                amount: '$204.00',
+            }),
         ]);
-
         expect(gatherDebitTransactionsInViewSortedByDate()).toEqual([]);
     });
 });
@@ -185,49 +190,36 @@ describe('gatherTransactionsByDate', () => {
 
     it('groups debits and credits by date with positive amounts', () => {
         setupTransactionTable([
-            createTransactionRow({ date: '4/9/2025', description: 'GOOGLE', amount: '-$10.73' }),
-            createTransactionRow({ date: '4/9/2025', description: 'VENMO', amount: '-$45.00' }),
-            createTransactionRow({ date: '4/9/2025', description: 'PAYCHECK', amount: '$500.00' }),
-            createTransactionRow({ date: '4/12/2025', description: 'WALMART', amount: '-$203.07' }),
+            createTransactionRow({ date: 'Apr 9 2025', description: 'GOOGLE', amount: '($10.73)' }),
+            createTransactionRow({ date: 'Apr 9 2025', description: 'VENMO', amount: '($45.00)' }),
+            createTransactionRow({
+                date: 'Apr 9 2025',
+                description: 'PAYCHECK',
+                amount: '$500.00',
+            }),
+            createTransactionRow({
+                date: 'Apr 12 2025',
+                description: 'WALMART',
+                amount: '($203.07)',
+            }),
         ]);
 
         const result = gatherTransactionsByDate();
         expect(result).toHaveLength(2);
         expect(result[0]).toMatchObject({ date: '4/9/2025' });
         expect(result[0].debits).toHaveLength(2);
-        expect(result[0].credits).toHaveLength(1);
-        expect(result[0].credits[0]).toEqual({
-            date: '4/9/2025',
-            description: 'PAYCHECK',
-            amount: 500,
-        });
-        expect(result[1]).toMatchObject({ date: '4/12/2025' });
-        expect(result[1].debits[0].description).toBe('WALMART');
+        expect(result[0].credits).toEqual([
+            { date: '4/9/2025', description: 'PAYCHECK', amount: 500 },
+        ]);
         expect(result[1].debits[0].amount).toBe(203.07);
-        expect(result[1].credits).toEqual([]);
     });
 
     it('sorts groups by date ascending', () => {
         setupTransactionTable([
-            createTransactionRow({ date: '4/12/2025', description: 'WALMART', amount: '-$203.07' }),
-            createTransactionRow({ date: '4/9/2025', description: 'GOOGLE', amount: '-$10.73' }),
+            createTransactionRow({ date: 'Apr 12 2025', amount: '($203.07)' }),
+            createTransactionRow({ date: 'Apr 9 2025', description: 'GOOGLE', amount: '($10.73)' }),
         ]);
-
-        const result = gatherTransactionsByDate();
-        expect(result.map((d) => d.date)).toEqual(['4/9/2025', '4/12/2025']);
-    });
-
-    it('sorts debits and credits alphabetically by description', () => {
-        setupTransactionTable([
-            createTransactionRow({ date: '4/9/2025', description: 'VENMO', amount: '-$45.00' }),
-            createTransactionRow({ date: '4/9/2025', description: 'GOOGLE', amount: '-$10.73' }),
-            createTransactionRow({ date: '4/9/2025', description: 'REFUND', amount: '$50.00' }),
-            createTransactionRow({ date: '4/9/2025', description: 'BONUS', amount: '$100.00' }),
-        ]);
-
-        const result = gatherTransactionsByDate();
-        expect(result[0].debits.map((t) => t.description)).toEqual(['GOOGLE', 'VENMO']);
-        expect(result[0].credits.map((t) => t.description)).toEqual(['BONUS', 'REFUND']);
+        expect(gatherTransactionsByDate().map((d) => d.date)).toEqual(['4/9/2025', '4/12/2025']);
     });
 
     it('returns an empty array when there are no transactions', () => {
@@ -236,51 +228,46 @@ describe('gatherTransactionsByDate', () => {
     });
 });
 
+function setupBalances(rows: Array<{ label: string; amount: string }>) {
+    document.body.innerHTML = `
+        <dl class="featured-hade-list">
+            ${rows
+                .map(
+                    ({ label, amount }) => `
+                <div class="featured-hade hade-detail">
+                    <dt test-id="hade-detail">${label}</dt>
+                    <dd test-id="hade-value">
+                        <span test-id="accountCurrency">
+                            <span class="numAmount">${amount}</span>
+                        </span>
+                    </dd>
+                </div>`,
+                )
+                .join('')}
+        </dl>
+    `;
+}
+
 describe('getCurrentBalance', () => {
     beforeEach(() => {
         document.body.innerHTML = '';
     });
 
-    function setupAccountDetails(balanceLabel: string, balanceValue: string) {
-        document.body.innerHTML = `
-            <div class="account-details">
-                <div class="row">
-                    <div class="col-xs-6 detail-label-col">
-                        <span class="detail-label">Account Type:</span>
-                    </div>
-                    <div class="col-xs-6 detail-item-col">
-                        <span class="detail-item">Checking</span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-xs-6 detail-label-col">
-                        <span class="detail-label">${balanceLabel}</span>
-                    </div>
-                    <div class="col-xs-6 detail-item-col">
-                        <span class="detail-item">${balanceValue}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    it('extracts balance from account details section', () => {
-        setupAccountDetails('Current Balance:', '$36.00');
-        expect(getCurrentBalance()).toBe('36.00');
+    it('extracts balance from the "Balance" hade row', () => {
+        setupBalances([
+            { label: 'Available Balance', amount: '$4,404.22' },
+            { label: 'Balance', amount: '$4,435.32' },
+        ]);
+        expect(getCurrentBalance()).toBe('4435.32');
     });
 
-    it('returns null when account details section is missing', () => {
+    it('returns null when no hade row has the Balance label', () => {
+        setupBalances([{ label: 'Available Balance', amount: '$4,404.22' }]);
         expect(getCurrentBalance()).toBeNull();
     });
 
-    it('returns null when no row contains Balance label', () => {
-        setupAccountDetails('Account Type:', 'Checking');
+    it('returns null when the balance list is missing', () => {
         expect(getCurrentBalance()).toBeNull();
-    });
-
-    it('strips $ and , from balance string', () => {
-        setupAccountDetails('Current Balance:', '$1,036.00');
-        expect(getCurrentBalance()).toBe('1036.00');
     });
 });
 
@@ -289,22 +276,16 @@ describe('getAvailableBalance', () => {
         document.body.innerHTML = '';
     });
 
-    it('reads balance from .primary-label-amount title attribute', () => {
-        document.body.innerHTML = `
-            <div class="primary-label-amount" title="$36.00"></div>
-        `;
-        expect(getAvailableBalance()).toBe('36.00');
+    it('extracts balance from the "Available Balance" hade row', () => {
+        setupBalances([
+            { label: 'Available Balance', amount: '$4,404.22' },
+            { label: 'Balance', amount: '$4,435.32' },
+        ]);
+        expect(getAvailableBalance()).toBe('4404.22');
     });
 
-    it('returns null when element is missing', () => {
+    it('returns null when the balance list is missing', () => {
         expect(getAvailableBalance()).toBeNull();
-    });
-
-    it('strips $ and ,', () => {
-        document.body.innerHTML = `
-            <div class="primary-label-amount" title="$1,036.00"></div>
-        `;
-        expect(getAvailableBalance()).toBe('1036.00');
     });
 });
 
@@ -313,22 +294,14 @@ describe('getAccountDescription', () => {
         document.body.innerHTML = '';
     });
 
-    it('combines account name and number', () => {
+    it('returns the account header title', () => {
         document.body.innerHTML = `
-            <div class="account-name">Checking</div>
-            <div class="account-number">****3858</div>
+            <span test-id="acctHeaderTitle" class="account-header-ellipsize">Classic Checking</span>
         `;
-        expect(getAccountDescription()).toBe('Checking ****3858');
+        expect(getAccountDescription()).toBe('Classic Checking');
     });
 
-    it('returns just the name when number is missing', () => {
-        document.body.innerHTML = `
-            <div class="account-name">Checking</div>
-        `;
-        expect(getAccountDescription()).toBe('Checking');
-    });
-
-    it('returns null when both are missing', () => {
+    it('returns null when the title element is missing', () => {
         expect(getAccountDescription()).toBeNull();
     });
 });

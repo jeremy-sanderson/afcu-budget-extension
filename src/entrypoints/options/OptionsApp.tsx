@@ -1,7 +1,8 @@
-import { useGenerateSummaries } from '../../utils/settings';
+import { useDebugLogging, useGenerateSummaries } from '../../utils/settings';
 
 export default function OptionsApp() {
     const [generateSummaries, setGenerateSummaries] = useGenerateSummaries();
+    const [debugLogging, setDebugLogging] = useDebugLogging();
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -30,6 +31,23 @@ export default function OptionsApp() {
                                 <span className="block text-sm text-gray-600 mt-0.5">
                                     When enabled, the extension produces a summary of the
                                     transactions you copy. Off by default.
+                                </span>
+                            </span>
+                        </label>
+                    </div>
+                    <div className="px-6 py-5 border-t border-gray-200">
+                        <label className="flex items-start gap-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                className="mt-1 h-4 w-4 accent-[#00548e] cursor-pointer"
+                                checked={debugLogging}
+                                onChange={(event) => setDebugLogging(event.target.checked)}
+                            />
+                            <span className="flex-1">
+                                <span className="block font-medium">Debug logging</span>
+                                <span className="block text-sm text-gray-600 mt-0.5">
+                                    When enabled, the extension prints diagnostic messages to the
+                                    browser console. Off by default.
                                 </span>
                             </span>
                         </label>

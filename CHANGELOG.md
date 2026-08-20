@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.0] - 2026-08-20
+
+### Fixed
+
+- Dialogs (Summary, Transactions, Alert, Confirm, Prompt) had no explicit `z-index`, so on the new portal they rendered behind the page's own positioned elements instead of on top. Backdrop and Positioner now match the `BudgetMenu`/`BudgetPanel` stacking level.
+
+## [3.7.0] - 2026-08-20
+
+### Added
+
+- "Debug logging" option (Options page) that enables diagnostic console messages for troubleshooting; off by default.
+
+## [3.6.0] - 2026-08-20
+
+### Changed
+
+- Restored extension functionality on America First's new Q2 Digital Banking portal (`digital.americafirst.com`), which replaced the previous Kendo-grid site. Selectors, transaction/balance parsing, and the details-page content script now target the new markup and SPA hash-based routing, with a polling fallback for navigations that don't fire a location-change event.
+- Added a cross-origin content script for the "Generate summary" button on account tiles on the new site's home-page widget (`sdk-cdn.onlineaccess1.com`).
+
 ## [3.4.0] - 2026-05-06
 
 ### Added

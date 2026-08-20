@@ -8,8 +8,8 @@ interface AlertDialogProps {
 export default function AlertDialog({ message, onClose }: AlertDialogProps) {
     return (
         <Dialog.Root open={true} onOpenChange={(e) => !e.open && onClose()}>
-            <Dialog.Backdrop className="fixed inset-0 bg-black/50" />
-            <Dialog.Positioner className="fixed inset-0 flex items-center justify-center">
+            <Dialog.Backdrop className="fixed inset-0 z-[99999] bg-black/50" />
+            <Dialog.Positioner className="fixed inset-0 z-[99999] flex items-center justify-center">
                 <Dialog.Content className="rounded-lg p-6 min-w-[400px] max-w-[80%] shadow-lg bg-white">
                     <Dialog.Description className="mb-5 text-lg text-gray-800 whitespace-pre-wrap break-words">
                         {message}

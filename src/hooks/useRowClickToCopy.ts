@@ -4,6 +4,8 @@ import {
     getRowData,
     convertTransactionToTSV,
 } from '../utils/data';
+import { AccountDetails } from '../utils/selectors';
+import { debugLog } from '../utils/logger';
 
 const HANDLED_ATTR = 'data-click-to-copy';
 const RED_100 = '#fee2e2';
@@ -35,7 +37,7 @@ function setupRowClickHandlers() {
             el.addEventListener('click', () => {
                 navigator.clipboard
                     .writeText(convertTransactionToTSV(debitTransaction))
-                    .then(() => console.log('Saved to clipboard', debitTransaction))
+                    .then(() => debugLog('Saved to clipboard', debitTransaction))
                     .catch((error) => console.error('Error copying transaction:', error));
             });
         } else {
@@ -48,7 +50,7 @@ export default function useRowClickToCopy() {
     useEffect(() => {
         setupRowClickHandlers();
 
-        const grid = document.querySelector('#PastTransactionsGrid');
+        const grid = document.querySelector(AccountDetails.transactionList);
         if (!grid) return;
 
         const observer = new MutationObserver(() => {
