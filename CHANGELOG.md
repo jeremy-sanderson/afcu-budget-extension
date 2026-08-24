@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-08-24
+
+### Fixed
+
+- Pending transactions are no longer included in per-row copy-to-clipboard, the "copy all debits" action, or the summary dialog.
+
 ## [4.0.0] - 2026-08-20
 
 ### Fixed

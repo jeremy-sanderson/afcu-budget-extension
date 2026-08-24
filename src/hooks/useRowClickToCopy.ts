@@ -3,6 +3,7 @@ import {
     getAllRowsInPastTransactionTable,
     getRowData,
     convertTransactionToTSV,
+    isPendingRow,
 } from '../utils/data';
 import { AccountDetails } from '../utils/selectors';
 import { debugLog } from '../utils/logger';
@@ -15,6 +16,7 @@ function setupRowClickHandlers() {
     getAllRowsInPastTransactionTable().forEach((row) => {
         const el = row as HTMLElement;
         if (el.hasAttribute(HANDLED_ATTR)) return;
+        if (isPendingRow(row)) return;
 
         const transaction = getRowData(row);
         if (!transaction) return;

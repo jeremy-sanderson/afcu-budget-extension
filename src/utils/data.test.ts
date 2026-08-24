@@ -181,6 +181,25 @@ describe('gatherDebitTransactionsInViewSortedByDate', () => {
         ]);
         expect(gatherDebitTransactionsInViewSortedByDate()).toEqual([]);
     });
+
+    it('excludes pending transactions', () => {
+        setupTransactionTable([
+            createTransactionRow({
+                date: 'Apr 12 2025',
+                description: 'WALMART',
+                amount: '($203.07)',
+            }),
+            createTransactionRow({
+                pending: true,
+                description: '08/19 - MAVERIK #683',
+                amount: '($1.90)',
+            }),
+        ]);
+
+        const result = gatherDebitTransactionsInViewSortedByDate();
+        expect(result).toHaveLength(1);
+        expect(result[0].description).toBe('WALMART');
+    });
 });
 
 describe('gatherTransactionsByDate', () => {
@@ -225,6 +244,27 @@ describe('gatherTransactionsByDate', () => {
     it('returns an empty array when there are no transactions', () => {
         setupTransactionTable([]);
         expect(gatherTransactionsByDate()).toEqual([]);
+    });
+
+    it('excludes pending transactions', () => {
+        setupTransactionTable([
+            createTransactionRow({
+                date: 'Apr 12 2025',
+                description: 'WALMART',
+                amount: '($203.07)',
+            }),
+            createTransactionRow({
+                pending: true,
+                description: '08/19 - MAVERIK #683',
+                amount: '($1.90)',
+            }),
+        ]);
+
+        const result = gatherTransactionsByDate();
+        expect(result).toHaveLength(1);
+        expect(result[0].debits).toEqual([
+            { date: '4/12/2025', description: 'WALMART', amount: 203.07 },
+        ]);
     });
 });
 

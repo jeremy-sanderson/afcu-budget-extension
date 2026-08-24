@@ -27,6 +27,12 @@ function resolvePendingYear(month: number, day: number): number {
     return candidate.getTime() > now.getTime() ? now.getFullYear() - 1 : now.getFullYear();
 }
 
+export function isPendingRow(row: Element): boolean {
+    return (
+        row.querySelector(AccountDetails.dateCell)?.textContent?.trim().toLowerCase() === 'pending'
+    );
+}
+
 function resolveDateAndDescription(row: Element): { date: string; description: string } | null {
     const dateCellText = row.querySelector(AccountDetails.dateCell)?.textContent?.trim() ?? '';
     const rawDescription =
@@ -88,6 +94,7 @@ export function gatherDebitTransactionsInViewSortedByDate(
     root: ParentNode = document,
 ): Transaction[] {
     return getAllRowsInPastTransactionTable(root)
+        .filter((row) => !isPendingRow(row))
         .map((row) => getRowData(row))
         .filter((t): t is Transaction => t !== null && t.amount < 0)
         .map((t) => ({ ...t, amount: Math.abs(t.amount) }))
@@ -106,6 +113,7 @@ function sortByDescription(transactions: Transaction[]): Transaction[] {
 export function gatherTransactionsByDate(root: ParentNode = document): TransactionsForDate[] {
     const byDate = new Map<string, { debits: Transaction[]; credits: Transaction[] }>();
     for (const row of getAllRowsInPastTransactionTable(root)) {
+        if (isPendingRow(row)) continue;
         const data = getRowData(row);
         if (!data) continue;
         const entry = byDate.get(data.date) ?? { debits: [], credits: [] };
