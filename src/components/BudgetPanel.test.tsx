@@ -28,6 +28,6 @@ describe('BudgetPanel', () => {
         const user = userEvent.setup();
         render(<BudgetPanel items={mockItems} />);
         await user.click(screen.getByRole('button', { name: 'Current Balance', hidden: true }));
-        expect(mockItems[2].onClick).toHaveBeenCalled();
+        expect(mockItems[2]?.onClick).toHaveBeenCalled();
     });
 });

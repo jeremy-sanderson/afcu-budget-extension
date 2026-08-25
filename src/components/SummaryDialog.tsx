@@ -50,8 +50,10 @@ export default function SummaryDialog({
     const visibleEntries = transactionsNewestFirst.slice(0, visibleDateCount);
     const remainingCount = transactionsNewestFirst.length - visibleEntries.length;
 
-    const visibleDebits = visibleEntries.flatMap((entry) => entry.debits);
-    const visibleCredits = visibleEntries.flatMap((entry) => entry.credits);
+    // Dates render newest-first, but clipboard output is always oldest-first.
+    const visibleEntriesOldestFirst = [...visibleEntries].reverse();
+    const visibleDebits = visibleEntriesOldestFirst.flatMap((entry) => entry.debits);
+    const visibleCredits = visibleEntriesOldestFirst.flatMap((entry) => entry.credits);
 
     const copy = (key: string, text: string) => {
         navigator.clipboard

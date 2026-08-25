@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import { WxtVitest } from 'wxt/testing';
+import { WxtVitest } from 'wxt/testing/vitest-plugin';
 
 export default defineConfig({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- WXT and vitest bundle different vite versions with incompatible plugin types

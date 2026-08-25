@@ -151,8 +151,8 @@ describe('gatherDebitTransactionsInViewSortedByDate', () => {
         ]);
 
         const result = gatherDebitTransactionsInViewSortedByDate();
-        expect(result[0].date).toBe('4/9/2025');
-        expect(result[1].date).toBe('4/12/2025');
+        expect(result[0]?.date).toBe('4/9/2025');
+        expect(result[1]?.date).toBe('4/12/2025');
     });
 
     it('sorts alphabetically by description when dates are equal', () => {
@@ -162,8 +162,8 @@ describe('gatherDebitTransactionsInViewSortedByDate', () => {
         ]);
 
         const result = gatherDebitTransactionsInViewSortedByDate();
-        expect(result[0].description).toBe('GOOGLE');
-        expect(result[1].description).toBe('VENMO');
+        expect(result[0]?.description).toBe('GOOGLE');
+        expect(result[1]?.description).toBe('VENMO');
     });
 
     it('returns empty array when no transactions exist', () => {
@@ -198,7 +198,7 @@ describe('gatherDebitTransactionsInViewSortedByDate', () => {
 
         const result = gatherDebitTransactionsInViewSortedByDate();
         expect(result).toHaveLength(1);
-        expect(result[0].description).toBe('WALMART');
+        expect(result[0]?.description).toBe('WALMART');
     });
 });
 
@@ -226,11 +226,11 @@ describe('gatherTransactionsByDate', () => {
         const result = gatherTransactionsByDate();
         expect(result).toHaveLength(2);
         expect(result[0]).toMatchObject({ date: '4/9/2025' });
-        expect(result[0].debits).toHaveLength(2);
-        expect(result[0].credits).toEqual([
+        expect(result[0]?.debits).toHaveLength(2);
+        expect(result[0]?.credits).toEqual([
             { date: '4/9/2025', description: 'PAYCHECK', amount: 500 },
         ]);
-        expect(result[1].debits[0].amount).toBe(203.07);
+        expect(result[1]?.debits[0]?.amount).toBe(203.07);
     });
 
     it('sorts groups by date ascending', () => {
@@ -262,7 +262,7 @@ describe('gatherTransactionsByDate', () => {
 
         const result = gatherTransactionsByDate();
         expect(result).toHaveLength(1);
-        expect(result[0].debits).toEqual([
+        expect(result[0]?.debits).toEqual([
             { date: '4/12/2025', description: 'WALMART', amount: 203.07 },
         ]);
     });

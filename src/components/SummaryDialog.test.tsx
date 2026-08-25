@@ -335,7 +335,9 @@ describe('SummaryDialog', () => {
         expect(screen.getByText('Debits on 4/9/2025')).toBeInTheDocument();
 
         const closeButtons = screen.getAllByText('Close');
-        await user.click(closeButtons[closeButtons.length - 1]);
+        const innermostCloseButton = closeButtons.at(-1);
+        if (!innermostCloseButton) throw new Error('Expected at least one Close button');
+        await user.click(innermostCloseButton);
 
         expect(screen.queryByText('Debits on 4/9/2025')).not.toBeInTheDocument();
     });
@@ -383,7 +385,7 @@ describe('SummaryDialog', () => {
         expect(screen.queryByText(/\*\*\*\*/)).not.toBeInTheDocument();
     });
 
-    it('copies all visible debits as TSV from the column header', async () => {
+    it('copies all visible debits as TSV in ascending date order from the column header', async () => {
         render(
             <SummaryDialog
                 currentBalance={null}
@@ -397,7 +399,7 @@ describe('SummaryDialog', () => {
             fireEvent.click(screen.getByLabelText('Copy all visible debits'));
         });
         expect(mockWriteText).toHaveBeenCalledWith(
-            '4/12/2025\tWALMART\t203.07\n4/9/2025\tGOOGLE\t10.73\n4/9/2025\tVENMO\t45',
+            '4/9/2025\tGOOGLE\t10.73\n4/9/2025\tVENMO\t45\n4/12/2025\tWALMART\t203.07',
         );
     });
 
@@ -440,7 +442,38 @@ describe('SummaryDialog', () => {
             fireEvent.click(screen.getByLabelText('Copy all visible debits'));
         });
         expect(mockWriteText).toHaveBeenCalledWith(
-            '4/7/2025\tD7\t7\n4/6/2025\tD6\t6\n4/5/2025\tD5\t5\n4/4/2025\tD4\t4\n4/3/2025\tD3\t3',
+            '4/3/2025\tD3\t3\n4/4/2025\tD4\t4\n4/5/2025\tD5\t5\n4/6/2025\tD6\t6\n4/7/2025\tD7\t7',
+        );
+    });
+
+    it('keeps the column-header debit copy in ascending date order after loading more dates', async () => {
+        const sevenDays: TransactionsForDate[] = Array.from({ length: 7 }, (_, i) => {
+            const date = `4/${i + 1}/2025`;
+            return {
+                date,
+                debits: [{ date, description: `D${i + 1}`, amount: i + 1 }],
+                credits: [],
+            };
+        });
+
+        render(
+            <SummaryDialog
+                currentBalance={null}
+                availableBalance={null}
+                transactionsByDate={sevenDays}
+                onClose={() => {}}
+            />,
+        );
+
+        await act(async () => {
+            fireEvent.click(screen.getByRole('button', { name: /Load 2 more/ }));
+        });
+        await act(async () => {
+            fireEvent.click(screen.getByLabelText('Copy all visible debits'));
+        });
+        expect(mockWriteText).toHaveBeenCalledWith(
+            '4/1/2025\tD1\t1\n4/2/2025\tD2\t2\n4/3/2025\tD3\t3\n4/4/2025\tD4\t4\n' +
+                '4/5/2025\tD5\t5\n4/6/2025\tD6\t6\n4/7/2025\tD7\t7',
         );
     });
 

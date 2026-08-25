@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.2.0] - 2026-08-25
+
+### Fixed
+
+- The summary dialog's "copy all visible debits" and "copy all visible credits" actions now write transactions to the clipboard in ascending date order. They previously followed the newest-first order of the on-screen table, which did not match the ordering of every other copy action.
+
 ## [4.1.0] - 2026-08-24
 
 ### Fixed
@@ -128,7 +134,9 @@ Initial tagged release of the pure-JavaScript content script.
 - Sample HTML snapshot of the AFCU page for local testing.
 - `README.md` documentation and spreadsheet usage instructions.
 
-[Unreleased]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v4.0.0...HEAD
+[Unreleased]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v4.2.0...HEAD
+[4.2.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v4.1.0...v4.2.0
+[4.1.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.4.0...v4.0.0
 [3.4.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.3.0...v3.4.0
 [3.3.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.2.0...v3.3.0

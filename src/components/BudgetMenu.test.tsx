@@ -65,6 +65,6 @@ describe('BudgetMenu', () => {
             await new Promise((r) => setTimeout(r, 0));
         });
         fireEvent.click(item);
-        await waitFor(() => expect(mockItems[2].onClick).toHaveBeenCalled());
+        await waitFor(() => expect(mockItems[2]?.onClick).toHaveBeenCalled());
     });
 });

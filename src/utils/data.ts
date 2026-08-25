@@ -44,6 +44,7 @@ function resolveDateAndDescription(row: Element): { date: string; description: s
         const match = rawDescription.match(PENDING_DESCRIPTION_PREFIX);
         if (!match) return null;
         const [, month, day, description] = match;
+        if (month === undefined || day === undefined || description === undefined) return null;
         const year = resolvePendingYear(Number(month), Number(day));
         return { date: formatDate(Number(month), Number(day), year), description };
     }
