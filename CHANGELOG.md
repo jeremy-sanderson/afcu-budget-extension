@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Copied transactions now use the full statement description (for example, `VISA - 08/22 NETFLIX.COM NETFLIX.COM CA`) instead of the shortened merchant name the page shows once the bank categorizes a transaction (`Netflix`). The extension reads these descriptions from the transaction data the page loads from the bank. If that data isn't available, it uses the page text instead, and the "copy debits" confirmation says so.
+
+### Added
+
+- "Transaction source" option (Options page) that switches between bank data (the default) and page text (the previous behavior).
+
+### Fixed
+
+- Every comma is now removed from transaction descriptions before copying. Previously only the first comma was removed.
+
 ## [4.2.0] - 2026-08-25
 
 ### Fixed

@@ -40,6 +40,7 @@ On wide browser viewports (1550px and wider), the menu auto-expands as a panel p
 Click the extension's toolbar icon to open the popup, or open the full options page from there. Available settings:
 
 - **Generate summaries** (off by default) — when enabled, adds a `Summary` item to the budgeting menu on the account details page and a summary button next to each deposit account on the Accounts page. The summary shows the current balance, available balance, and debits grouped by date, each with a one-click copy button.
+- **Transaction source** (Options page, bank data by default) — where copied transaction descriptions come from. **Bank data** copies the full statement description the bank records (for example, `VISA - 08/22 NETFLIX.COM NETFLIX.COM CA`), and uses the page text if that data isn't available. **Page text** copies what the transaction list shows, which can be a shortened merchant name such as `Netflix`.
 
 ## Development
 

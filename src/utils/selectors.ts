@@ -4,6 +4,8 @@ export const AccountDetails = {
     dateCell: '.col-date',
     descriptionCell: '[test-id="historyItemDescription"]',
     amountValue: '[test-id="lblAmount"] .numAmount',
+    transactionActions: '[test-id="transactionActionsDropDown"]',
+    transactionIdAttr: 'context-value',
     balanceList: 'dl.featured-hade-list',
     balanceLabel: '[test-id="hade-detail"]',
     balanceValue: '[test-id="hade-value"] .numAmount',

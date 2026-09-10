@@ -1,4 +1,4 @@
-const ACCOUNT_DETAILS_HASH = /^#\/account\/\d+/;
+const ACCOUNT_DETAILS_HASH = /^#\/account\/(\d+)/;
 const LEGACY_HOST = 'webaccess45.americafirst.com';
 
 export function isAccountDetailsRoute(): boolean {
@@ -8,4 +8,8 @@ export function isAccountDetailsRoute(): boolean {
     // page is loading) and must NOT be treated as a match, or the UI flashes on every navigation.
     if (location.hostname === LEGACY_HOST) return true;
     return ACCOUNT_DETAILS_HASH.test(location.hash);
+}
+
+export function getAccountIdFromHash(hash: string = location.hash): string | null {
+    return ACCOUNT_DETAILS_HASH.exec(hash)?.[1] ?? null;
 }

@@ -9,11 +9,12 @@ import ConfirmDialog from '../../components/ConfirmDialog';
 import PromptDialog from '../../components/PromptDialog';
 import SummaryDialog from '../../components/SummaryDialog';
 import {
-    gatherTransactionsByDate,
     getAccountDescription,
     getAvailableBalance,
     getCurrentBalance,
+    groupTransactionsByDate,
 } from '../../utils/data';
+import { readTransactions } from '../../utils/transactionSource';
 import type { SummaryData } from '../../utils/types';
 import { useGenerateSummaries } from '../../utils/settings';
 
@@ -24,13 +25,19 @@ export default function App() {
     const [summary, setSummary] = useState<SummaryData | null>(null);
     useRowClickToCopy();
 
-    const openSummary = () => {
-        setSummary({
-            currentBalance: getCurrentBalance(),
-            availableBalance: getAvailableBalance(),
-            transactionsByDate: gatherTransactionsByDate(),
-            accountDescription: getAccountDescription(),
-        });
+    const openSummary = async () => {
+        try {
+            const { transactions } = await readTransactions();
+            setSummary({
+                currentBalance: getCurrentBalance(),
+                availableBalance: getAvailableBalance(),
+                transactionsByDate: groupTransactionsByDate(transactions),
+                accountDescription: getAccountDescription(),
+            });
+        } catch (error) {
+            console.error('Error loading summary:', error);
+            dialog.showAlert('Error loading summary. Please try again.');
+        }
     };
 
     const menuItems = [
