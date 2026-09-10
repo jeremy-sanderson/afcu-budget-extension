@@ -1,129 +1,51 @@
 import type { Transaction, TransactionsForDate } from './types';
 import { AccountDetails } from './selectors';
 
-const PENDING_DESCRIPTION_PREFIX = /^(\d{1,2})\/(\d{1,2})\s*-\s*(.*)$/;
-
-function stripCurrencyFormatting(text: string): string {
+export function stripCurrencyFormatting(text: string): string {
     const trimmed = text.trim();
     const isNegative = /^\(.*\)$/.test(trimmed);
     const digits = trimmed.replace(/[()$,]/g, '');
     return isNegative ? `-${digits}` : digits;
 }
 
-function parseAmountToNumber(text: string): number {
-    return Number(stripCurrencyFormatting(text));
-}
-
-function formatDate(month: number, day: number, year: number): string {
+export function formatDate(month: number, day: number, year: number): string {
     return `${month}/${day}/${year}`;
 }
 
-// Pending transactions are always recent. If the parsed MM/DD would land in the future
-// relative to today, it must actually belong to last year (e.g. a 12/31 pending item viewed
-// on 1/1).
-function resolvePendingYear(month: number, day: number): number {
-    const now = new Date();
-    const candidate = new Date(now.getFullYear(), month - 1, day);
-    return candidate.getTime() > now.getTime() ? now.getFullYear() - 1 : now.getFullYear();
-}
-
-export function isPendingRow(row: Element): boolean {
-    return (
-        row.querySelector(AccountDetails.dateCell)?.textContent?.trim().toLowerCase() === 'pending'
-    );
-}
-
-function resolveDateAndDescription(row: Element): { date: string; description: string } | null {
-    const dateCellText = row.querySelector(AccountDetails.dateCell)?.textContent?.trim() ?? '';
-    const rawDescription =
-        row.querySelector(AccountDetails.descriptionCell)?.textContent?.trim() ?? '';
-
-    if (!dateCellText) return null;
-
-    if (dateCellText.toLowerCase() === 'pending') {
-        const match = rawDescription.match(PENDING_DESCRIPTION_PREFIX);
-        if (!match) return null;
-        const [, month, day, description] = match;
-        if (month === undefined || day === undefined || description === undefined) return null;
-        const year = resolvePendingYear(Number(month), Number(day));
-        return { date: formatDate(Number(month), Number(day), year), description };
-    }
-
-    const parsed = new Date(dateCellText);
-    if (Number.isNaN(parsed.getTime())) {
-        return { date: dateCellText, description: rawDescription };
-    }
-    return {
-        date: formatDate(parsed.getMonth() + 1, parsed.getDate(), parsed.getFullYear()),
-        description: rawDescription,
-    };
-}
-
-export function getRowData(row: Element): Transaction | null {
-    try {
-        const resolved = resolveDateAndDescription(row);
-        const amountText = row.querySelector(AccountDetails.amountValue)?.textContent;
-
-        if (!resolved || !amountText) {
-            return null;
-        }
-
-        return {
-            date: resolved.date,
-            description: resolved.description.replace(',', '').replace('\n', ''),
-            amount: parseAmountToNumber(amountText),
-        };
-    } catch (error) {
-        console.error('Error parsing row data:', error);
-        return null;
-    }
+export function sanitizeDescription(text: string): string {
+    return text.trim().replaceAll(',', '').replaceAll('\n', '');
 }
 
 export function convertTransactionToTSV(transaction: Transaction): string {
     return `${transaction.date}\t${transaction.description}\t${transaction.amount}`;
 }
 
-export function getAllRowsInPastTransactionTable(root: ParentNode = document): Element[] {
-    return [
-        ...root.querySelectorAll(
-            `${AccountDetails.transactionList} ${AccountDetails.transactionRow}`,
-        ),
-    ];
+function compareByDateThenDescription(a: Transaction, b: Transaction): number {
+    const dateComparison = Date.parse(a.date) - Date.parse(b.date);
+    return dateComparison === 0 ? a.description.localeCompare(b.description) : dateComparison;
 }
 
-export function gatherDebitTransactionsInViewSortedByDate(
-    root: ParentNode = document,
-): Transaction[] {
-    return getAllRowsInPastTransactionTable(root)
-        .filter((row) => !isPendingRow(row))
-        .map((row) => getRowData(row))
-        .filter((t): t is Transaction => t !== null && t.amount < 0)
+export function toSortedDebits(transactions: Transaction[]): Transaction[] {
+    return transactions
+        .filter((t) => t.amount < 0)
         .map((t) => ({ ...t, amount: Math.abs(t.amount) }))
-        .sort((a, b) => {
-            const dateComparison = Date.parse(a.date) - Date.parse(b.date);
-            return dateComparison === 0
-                ? a.description.localeCompare(b.description)
-                : dateComparison;
-        });
+        .sort(compareByDateThenDescription);
 }
 
 function sortByDescription(transactions: Transaction[]): Transaction[] {
     return [...transactions].sort((a, b) => a.description.localeCompare(b.description));
 }
 
-export function gatherTransactionsByDate(root: ParentNode = document): TransactionsForDate[] {
+export function groupTransactionsByDate(transactions: Transaction[]): TransactionsForDate[] {
     const byDate = new Map<string, { debits: Transaction[]; credits: Transaction[] }>();
-    for (const row of getAllRowsInPastTransactionTable(root)) {
-        if (isPendingRow(row)) continue;
-        const data = getRowData(row);
-        if (!data) continue;
-        const entry = byDate.get(data.date) ?? { debits: [], credits: [] };
-        if (data.amount < 0) {
-            entry.debits.push({ ...data, amount: Math.abs(data.amount) });
-        } else if (data.amount > 0) {
-            entry.credits.push(data);
+    for (const transaction of transactions) {
+        const entry = byDate.get(transaction.date) ?? { debits: [], credits: [] };
+        if (transaction.amount < 0) {
+            entry.debits.push({ ...transaction, amount: Math.abs(transaction.amount) });
+        } else if (transaction.amount > 0) {
+            entry.credits.push(transaction);
         }
-        byDate.set(data.date, entry);
+        byDate.set(transaction.date, entry);
     }
     return [...byDate.entries()]
         .map(([date, { debits, credits }]) => ({

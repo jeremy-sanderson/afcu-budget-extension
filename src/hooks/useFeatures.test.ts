@@ -3,12 +3,17 @@ import { renderHook, act } from '@testing-library/react';
 import useFeatures from './useFeatures';
 import type { DialogAPI } from './useDialog';
 import * as data from '../utils/data';
+import { readTransactions } from '../utils/transactionSource';
+import type { Transaction } from '../utils/types';
 
-vi.mock('../utils/data', () => ({
-    gatherDebitTransactionsInViewSortedByDate: vi.fn(),
-    convertTransactionToTSV: vi.fn(),
+vi.mock('../utils/data', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('../utils/data')>()),
     getCurrentBalance: vi.fn(),
     getAvailableBalance: vi.fn(),
+}));
+
+vi.mock('../utils/transactionSource', () => ({
+    readTransactions: vi.fn(),
 }));
 
 function createMockDialog(): DialogAPI {
@@ -19,6 +24,10 @@ function createMockDialog(): DialogAPI {
         showPrompt: vi.fn(),
         close: vi.fn(),
     };
+}
+
+function mockTransactions(transactions: Transaction[], usedPageFallback = false) {
+    vi.mocked(readTransactions).mockResolvedValue({ transactions, usedPageFallback });
 }
 
 const mockWriteText = vi.fn().mockResolvedValue(undefined);
@@ -38,57 +47,51 @@ async function flushMicrotasks() {
 
 describe('useFeatures', () => {
     describe('debitTransactionsFromYesterday', () => {
-        it('filters to yesterday and copies to clipboard', async () => {
+        it('copies debits since yesterday as TSV', async () => {
             const mockDialog = createMockDialog();
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
-
-            vi.mocked(data.gatherDebitTransactionsInViewSortedByDate).mockReturnValue([
-                { date: yesterday.toLocaleDateString(), description: 'WALMART', amount: 50 },
-                { date: '1/1/2020', description: 'OLD', amount: 10 },
+            const yesterdayDate = yesterday.toLocaleDateString();
+            mockTransactions([
+                { date: yesterdayDate, description: 'WALMART', amount: -50 },
+                { date: '1/1/2020', description: 'OLD', amount: -10 },
             ]);
-            vi.mocked(data.convertTransactionToTSV).mockReturnValue('tsv-line');
 
             const { result } = renderHook(() => useFeatures(mockDialog));
             act(() => result.current.debitTransactionsFromYesterday());
             await flushMicrotasks();
 
-            expect(mockWriteText).toHaveBeenCalledWith('tsv-line');
+            expect(mockWriteText).toHaveBeenCalledWith(`${yesterdayDate}\tWALMART\t50`);
             expect(mockDialog.showAlert).toHaveBeenCalledWith('1 transactions copied to clipboard');
         });
     });
 
     describe('debitTransactionsFromToday', () => {
-        it('filters to today and copies to clipboard', async () => {
+        it('copies debits from today as TSV', async () => {
             const mockDialog = createMockDialog();
             const today = new Date().toLocaleDateString();
-
-            vi.mocked(data.gatherDebitTransactionsInViewSortedByDate).mockReturnValue([
-                { date: today, description: 'GOOGLE', amount: 10 },
-            ]);
-            vi.mocked(data.convertTransactionToTSV).mockReturnValue('today-tsv');
+            mockTransactions([{ date: today, description: 'GOOGLE', amount: -10 }]);
 
             const { result } = renderHook(() => useFeatures(mockDialog));
             act(() => result.current.debitTransactionsFromToday());
             await flushMicrotasks();
 
-            expect(mockWriteText).toHaveBeenCalledWith('today-tsv');
+            expect(mockWriteText).toHaveBeenCalledWith(`${today}\tGOOGLE\t10`);
             expect(mockDialog.showAlert).toHaveBeenCalledWith('1 transactions copied to clipboard');
         });
     });
 
     describe('debitTransactionsWithDate', () => {
-        it('prompts for date input and filters accordingly', async () => {
+        it('copies debits on or after the entered date, oldest first', async () => {
             const mockDialog = createMockDialog();
             vi.mocked(mockDialog.showPrompt).mockImplementation((_msg, onResult) => {
                 onResult('4/9/2025');
             });
-
-            vi.mocked(data.gatherDebitTransactionsInViewSortedByDate).mockReturnValue([
-                { date: '4/9/2025', description: 'GOOGLE', amount: 10 },
-                { date: '4/12/2025', description: 'WALMART', amount: 50 },
+            mockTransactions([
+                { date: '4/12/2025', description: 'WALMART', amount: -50 },
+                { date: '4/9/2025', description: 'GOOGLE', amount: -10 },
+                { date: '4/8/2025', description: 'EARLIER', amount: -5 },
             ]);
-            vi.mocked(data.convertTransactionToTSV).mockReturnValue('tsv');
 
             const { result } = renderHook(() => useFeatures(mockDialog));
             act(() => result.current.debitTransactionsWithDate());
@@ -98,7 +101,9 @@ describe('useFeatures', () => {
                 'Enter start date (blank for today)',
                 expect.any(Function),
             );
-            expect(mockWriteText).toHaveBeenCalled();
+            expect(mockWriteText).toHaveBeenCalledWith(
+                '4/9/2025\tGOOGLE\t10\n4/12/2025\tWALMART\t50',
+            );
         });
 
         it('defaults to today when blank input', async () => {
@@ -106,18 +111,74 @@ describe('useFeatures', () => {
             vi.mocked(mockDialog.showPrompt).mockImplementation((_msg, onResult) => {
                 onResult('');
             });
-
             const today = new Date().toLocaleDateString();
-            vi.mocked(data.gatherDebitTransactionsInViewSortedByDate).mockReturnValue([
-                { date: today, description: 'TEST', amount: 10 },
-            ]);
-            vi.mocked(data.convertTransactionToTSV).mockReturnValue('tsv');
+            mockTransactions([{ date: today, description: 'TEST', amount: -10 }]);
 
             const { result } = renderHook(() => useFeatures(mockDialog));
             act(() => result.current.debitTransactionsWithDate());
             await flushMicrotasks();
 
-            expect(mockWriteText).toHaveBeenCalled();
+            expect(mockWriteText).toHaveBeenCalledWith(`${today}\tTEST\t10`);
+        });
+    });
+
+    describe('copying debits', () => {
+        it('skips credits and reports when nothing matches', async () => {
+            const mockDialog = createMockDialog();
+            const today = new Date().toLocaleDateString();
+            mockTransactions([{ date: today, description: 'PAYCHECK', amount: 500 }]);
+
+            const { result } = renderHook(() => useFeatures(mockDialog));
+            act(() => result.current.debitTransactionsFromToday());
+            await flushMicrotasks();
+
+            expect(mockWriteText).not.toHaveBeenCalled();
+            expect(mockDialog.showAlert).toHaveBeenCalledWith(
+                'No transactions found for the selected date range.',
+            );
+        });
+
+        it('notes when the page text was used instead of bank data', async () => {
+            const mockDialog = createMockDialog();
+            const today = new Date().toLocaleDateString();
+            mockTransactions([{ date: today, description: 'Netflix', amount: -21.48 }], true);
+
+            const { result } = renderHook(() => useFeatures(mockDialog));
+            act(() => result.current.debitTransactionsFromToday());
+            await flushMicrotasks();
+
+            expect(mockDialog.showAlert).toHaveBeenCalledWith(
+                "1 transactions copied to clipboard. Full statement descriptions weren't available, so the shortened descriptions shown on the page were used.",
+            );
+        });
+
+        it('shows an error when transactions cannot be read', async () => {
+            const mockDialog = createMockDialog();
+            vi.spyOn(console, 'error').mockImplementation(() => {});
+            vi.mocked(readTransactions).mockRejectedValue(new Error('storage unavailable'));
+
+            const { result } = renderHook(() => useFeatures(mockDialog));
+            act(() => result.current.debitTransactionsFromToday());
+            await flushMicrotasks();
+
+            expect(mockDialog.showAlert).toHaveBeenCalledWith(
+                'Error filtering transactions. Please try again.',
+            );
+        });
+
+        it('shows alert with transaction count after copy', async () => {
+            const mockDialog = createMockDialog();
+            const today = new Date().toLocaleDateString();
+            mockTransactions([
+                { date: today, description: 'A', amount: -10 },
+                { date: today, description: 'B', amount: -20 },
+            ]);
+
+            const { result } = renderHook(() => useFeatures(mockDialog));
+            act(() => result.current.debitTransactionsFromToday());
+            await flushMicrotasks();
+
+            expect(mockDialog.showAlert).toHaveBeenCalledWith('2 transactions copied to clipboard');
         });
     });
 
@@ -151,23 +212,6 @@ describe('useFeatures', () => {
                 'Available balance copied to clipboard',
             );
         });
-    });
-
-    it('shows alert with transaction count after copy', async () => {
-        const mockDialog = createMockDialog();
-        vi.mocked(data.gatherDebitTransactionsInViewSortedByDate).mockReturnValue([
-            { date: new Date().toLocaleDateString(), description: 'A', amount: 10 },
-            { date: new Date().toLocaleDateString(), description: 'B', amount: 20 },
-        ]);
-        vi.mocked(data.convertTransactionToTSV).mockImplementation(
-            (t) => `${t.date}\t${t.description}\t${t.amount}`,
-        );
-
-        const { result } = renderHook(() => useFeatures(mockDialog));
-        act(() => result.current.debitTransactionsFromToday());
-        await flushMicrotasks();
-
-        expect(mockDialog.showAlert).toHaveBeenCalledWith('2 transactions copied to clipboard');
     });
 
     it('shows error alert when clipboard write fails', async () => {

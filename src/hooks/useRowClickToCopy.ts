@@ -1,16 +1,29 @@
 import { useEffect } from 'react';
+import { convertTransactionToTSV } from '../utils/data';
 import {
     getAllRowsInPastTransactionTable,
     getRowData,
-    convertTransactionToTSV,
     isPendingRow,
-} from '../utils/data';
+} from '../utils/pageTransactions';
+import { readRowTransaction } from '../utils/transactionSource';
+import type { Transaction } from '../utils/types';
 import { AccountDetails } from '../utils/selectors';
 import { debugLog } from '../utils/logger';
 
 const HANDLED_ATTR = 'data-click-to-copy';
 const RED_100 = '#fee2e2';
 const GREEN_100 = '#dcfce7';
+
+async function copyRowToClipboard(row: Element, pageTransaction: Transaction) {
+    try {
+        const transaction = (await readRowTransaction(row)) ?? pageTransaction;
+        const debitTransaction = { ...transaction, amount: Math.abs(transaction.amount) };
+        await navigator.clipboard.writeText(convertTransactionToTSV(debitTransaction));
+        debugLog('Saved to clipboard', debitTransaction);
+    } catch (error) {
+        console.error('Error copying transaction:', error);
+    }
+}
 
 function setupRowClickHandlers() {
     getAllRowsInPastTransactionTable().forEach((row) => {
@@ -24,7 +37,6 @@ function setupRowClickHandlers() {
         el.setAttribute(HANDLED_ATTR, '');
 
         if (transaction.amount < 0) {
-            const debitTransaction = { ...transaction, amount: Math.abs(transaction.amount) };
             el.style.cursor = 'pointer';
             el.style.setProperty('background-color', RED_100, 'important');
 
@@ -37,10 +49,7 @@ function setupRowClickHandlers() {
             });
 
             el.addEventListener('click', () => {
-                navigator.clipboard
-                    .writeText(convertTransactionToTSV(debitTransaction))
-                    .then(() => debugLog('Saved to clipboard', debitTransaction))
-                    .catch((error) => console.error('Error copying transaction:', error));
+                copyRowToClipboard(row, transaction);
             });
         } else {
             el.style.setProperty('background-color', GREEN_100, 'important');

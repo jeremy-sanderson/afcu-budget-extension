@@ -1,32 +1,31 @@
 import { useCallback } from 'react';
 import type { DialogAPI } from './useDialog';
 import {
-    gatherDebitTransactionsInViewSortedByDate,
     convertTransactionToTSV,
-    getCurrentBalance,
     getAvailableBalance,
+    getCurrentBalance,
+    toSortedDebits,
 } from '../utils/data';
+import { readTransactions } from '../utils/transactionSource';
 
-function copyTransactionsToClipboard(filterDate: number, dialog: DialogAPI) {
+const PAGE_FALLBACK_NOTE =
+    "Full statement descriptions weren't available, so the shortened descriptions shown on the page were used.";
+
+async function copyTransactionsToClipboard(filterDate: number, dialog: DialogAPI) {
     try {
-        const transactions = gatherDebitTransactionsInViewSortedByDate()
+        const { transactions, usedPageFallback } = await readTransactions();
+        const rows = toSortedDebits(transactions)
             .filter((t) => Date.parse(t.date) >= filterDate)
             .map((t) => convertTransactionToTSV(t));
 
-        if (transactions.length === 0) {
+        if (rows.length === 0) {
             dialog.showAlert('No transactions found for the selected date range.');
             return;
         }
 
-        navigator.clipboard
-            .writeText(transactions.join('\n'))
-            .then(() => {
-                dialog.showAlert(`${transactions.length} transactions copied to clipboard`);
-            })
-            .catch((error) => {
-                console.error('Error filtering transactions:', error);
-                dialog.showAlert('Error filtering transactions. Please try again.');
-            });
+        await navigator.clipboard.writeText(rows.join('\n'));
+        const message = `${rows.length} transactions copied to clipboard`;
+        dialog.showAlert(usedPageFallback ? `${message}. ${PAGE_FALLBACK_NOTE}` : message);
     } catch (error) {
         console.error('Error filtering transactions:', error);
         dialog.showAlert('Error filtering transactions. Please try again.');

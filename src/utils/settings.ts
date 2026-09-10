@@ -1,6 +1,8 @@
 import { storage } from '#imports';
 import { useEffect, useState } from 'react';
 
+export type TransactionSource = 'api' | 'page';
+
 export const generateSummariesSetting = storage.defineItem<boolean>('sync:generateSummaries', {
     fallback: false,
 });
@@ -9,10 +11,20 @@ export const debugLoggingSetting = storage.defineItem<boolean>('sync:debugLoggin
     fallback: false,
 });
 
-function useStorageSetting(
-    setting: typeof generateSummariesSetting,
-): [boolean, (value: boolean) => Promise<void>] {
-    const [value, setValue] = useState(false);
+export const transactionSourceSetting = storage.defineItem<TransactionSource>(
+    'sync:transactionSource',
+    { fallback: 'api' },
+);
+
+interface StorageSetting<T> {
+    fallback: T;
+    getValue(): Promise<T>;
+    setValue(value: T): Promise<void>;
+    watch(callback: (value: T) => void): () => void;
+}
+
+function useStorageSetting<T>(setting: StorageSetting<T>): [T, (value: T) => Promise<void>] {
+    const [value, setValue] = useState<T>(setting.fallback);
 
     useEffect(() => {
         let active = true;
@@ -26,7 +38,7 @@ function useStorageSetting(
         };
     }, [setting]);
 
-    const update = async (next: boolean) => {
+    const update = async (next: T) => {
         await setting.setValue(next);
         setValue(next);
     };
@@ -40,4 +52,11 @@ export function useGenerateSummaries(): [boolean, (value: boolean) => Promise<vo
 
 export function useDebugLogging(): [boolean, (value: boolean) => Promise<void>] {
     return useStorageSetting(debugLoggingSetting);
+}
+
+export function useTransactionSource(): [
+    TransactionSource,
+    (value: TransactionSource) => Promise<void>,
+] {
+    return useStorageSetting(transactionSourceSetting);
 }

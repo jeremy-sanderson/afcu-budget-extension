@@ -16,6 +16,6 @@ export default tseslint.config(
     },
     prettier,
     {
-        ignores: ['node_modules/', 'dist/', '.output/', '.wxt/'],
+        ignores: ['node_modules/', 'dist/', '.output/', '.wxt/', 'thoughts/'],
     },
 );

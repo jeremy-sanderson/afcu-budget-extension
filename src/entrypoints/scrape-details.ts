@@ -1,10 +1,11 @@
 import {
-    gatherTransactionsByDate,
     getAccountDescription,
     getAvailableBalance,
     getCurrentBalance,
+    groupTransactionsByDate,
 } from '../utils/data';
 import { AccountDetails } from '../utils/selectors';
+import { readTransactions } from '../utils/transactionSource';
 import type { SummaryData } from '../utils/types';
 
 const TIMEOUT_MS = 15000;
@@ -39,10 +40,11 @@ async function scrape(): Promise<ScrapeResult> {
         deadline,
     );
 
+    const { transactions } = await readTransactions();
     return {
         currentBalance: getCurrentBalance(),
         availableBalance: getAvailableBalance(),
-        transactionsByDate: gatherTransactionsByDate(),
+        transactionsByDate: groupTransactionsByDate(transactions),
         accountDescription: getAccountDescription(),
     };
 }

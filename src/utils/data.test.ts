@@ -1,112 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
-    getRowData,
     convertTransactionToTSV,
-    gatherDebitTransactionsInViewSortedByDate,
-    gatherTransactionsByDate,
-    getCurrentBalance,
-    getAvailableBalance,
     getAccountDescription,
+    getAvailableBalance,
+    getCurrentBalance,
+    groupTransactionsByDate,
+    sanitizeDescription,
+    toSortedDebits,
 } from './data';
+import type { Transaction } from './types';
 
-function createTransactionRow({
-    date = 'Apr 12 2025',
-    description = 'WALMART PURCHASE',
-    amount = '($203.07)',
-    pending = false,
-    omitDate = false,
-    omitAmount = false,
-}: {
-    date?: string;
-    description?: string;
-    amount?: string;
-    pending?: boolean;
-    omitDate?: boolean;
-    omitAmount?: boolean;
-} = {}): HTMLLIElement {
-    const li = document.createElement('li');
-    li.className = 'transaction-history-item';
-    const dateCell = pending ? 'Pending' : date;
-    li.innerHTML = `
-        <a class="datatable-row parent-template pointer ${pending ? 'pending' : ''}">
-            <div class="row-content flex">
-                ${omitDate ? '' : `<div class="col-date">${dateCell}</div>`}
-                <div class="col-desc">
-                    <div test-id="historyItemDescription" class="description-text">${description}</div>
-                </div>
-                <div class="col-amount">
-                    ${omitAmount ? '' : `<span test-id="lblAmount" class="amount"><span class="numAmount">${amount}</span></span>`}
-                </div>
-            </div>
-        </a>
-    `;
-    return li;
+function transaction(date: string, description: string, amount: number): Transaction {
+    return { date, description, amount };
 }
-
-function setupTransactionTable(rows: HTMLLIElement[]) {
-    document.body.innerHTML = '<ul id="historyItems"></ul>';
-    const list = document.querySelector('#historyItems')!;
-    rows.forEach((row) => list.appendChild(row));
-}
-
-describe('getRowData', () => {
-    it('parses a posted row with a negative (parenthesized) amount', () => {
-        const row = createTransactionRow();
-        const result = getRowData(row);
-        expect(result).toEqual({
-            date: '4/12/2025',
-            description: 'WALMART PURCHASE',
-            amount: -203.07,
-        });
-    });
-
-    it('parses a posted row with a positive (credit) amount', () => {
-        const row = createTransactionRow({ amount: '$204.00' });
-        const result = getRowData(row);
-        expect(result).toEqual({
-            date: '4/12/2025',
-            description: 'WALMART PURCHASE',
-            amount: 204,
-        });
-    });
-
-    it('parses a pending row, reading the date from the description prefix', () => {
-        const row = createTransactionRow({
-            pending: true,
-            description: '08/19 - MAVERIK #683',
-            amount: '($1.90)',
-        });
-        const result = getRowData(row);
-        expect(result?.description).toBe('MAVERIK #683');
-        expect(result?.amount).toBe(-1.9);
-        expect(result?.date).toMatch(/^8\/19\/\d{4}$/);
-    });
-
-    it('returns null for a pending row whose description has no date prefix', () => {
-        const row = createTransactionRow({ pending: true, description: 'MAVERIK #683' });
-        expect(getRowData(row)).toBeNull();
-    });
-
-    it('returns null when the date cell is missing', () => {
-        const row = createTransactionRow({ omitDate: true });
-        expect(getRowData(row)).toBeNull();
-    });
-
-    it('returns null when the amount span is missing', () => {
-        const row = createTransactionRow({ omitAmount: true });
-        expect(getRowData(row)).toBeNull();
-    });
-
-    it('strips commas and newlines from description', () => {
-        const row = createTransactionRow({ description: 'PURCHASE, WALMART STORE' });
-        expect(getRowData(row)?.description).toBe('PURCHASE WALMART STORE');
-    });
-
-    it('strips $, commas, and parentheses from amount and converts to a negative number', () => {
-        const row = createTransactionRow({ amount: '($1,203.07)' });
-        expect(getRowData(row)?.amount).toBe(-1203.07);
-    });
-});
 
 describe('convertTransactionToTSV', () => {
     it('formats transaction as tab-separated string', () => {
@@ -119,152 +25,76 @@ describe('convertTransactionToTSV', () => {
     });
 });
 
-describe('gatherDebitTransactionsInViewSortedByDate', () => {
-    beforeEach(() => {
-        document.body.innerHTML = '';
-    });
-
-    it('returns only debit transactions with amounts flipped to positive', () => {
-        setupTransactionTable([
-            createTransactionRow({
-                date: 'Apr 12 2025',
-                description: 'WALMART',
-                amount: '($203.07)',
-            }),
-            createTransactionRow({
-                date: 'Apr 11 2025',
-                description: 'TRANSFER',
-                amount: '$204.00',
-            }),
-            createTransactionRow({ date: 'Apr 9 2025', description: 'GOOGLE', amount: '($10.73)' }),
-        ]);
-
-        const result = gatherDebitTransactionsInViewSortedByDate();
-        expect(result).toHaveLength(2);
-        result.forEach((t) => expect(t.amount).toBeGreaterThan(0));
-    });
-
-    it('sorts by date ascending', () => {
-        setupTransactionTable([
-            createTransactionRow({ date: 'Apr 12 2025', amount: '($203.07)' }),
-            createTransactionRow({ date: 'Apr 9 2025', description: 'GOOGLE', amount: '($10.73)' }),
-        ]);
-
-        const result = gatherDebitTransactionsInViewSortedByDate();
-        expect(result[0]?.date).toBe('4/9/2025');
-        expect(result[1]?.date).toBe('4/12/2025');
-    });
-
-    it('sorts alphabetically by description when dates are equal', () => {
-        setupTransactionTable([
-            createTransactionRow({ date: 'Apr 9 2025', description: 'VENMO', amount: '($45.00)' }),
-            createTransactionRow({ date: 'Apr 9 2025', description: 'GOOGLE', amount: '($10.73)' }),
-        ]);
-
-        const result = gatherDebitTransactionsInViewSortedByDate();
-        expect(result[0]?.description).toBe('GOOGLE');
-        expect(result[1]?.description).toBe('VENMO');
-    });
-
-    it('returns empty array when no transactions exist', () => {
-        setupTransactionTable([]);
-        expect(gatherDebitTransactionsInViewSortedByDate()).toEqual([]);
-    });
-
-    it('filters out credit transactions', () => {
-        setupTransactionTable([
-            createTransactionRow({
-                date: 'Apr 11 2025',
-                description: 'TRANSFER',
-                amount: '$204.00',
-            }),
-        ]);
-        expect(gatherDebitTransactionsInViewSortedByDate()).toEqual([]);
-    });
-
-    it('excludes pending transactions', () => {
-        setupTransactionTable([
-            createTransactionRow({
-                date: 'Apr 12 2025',
-                description: 'WALMART',
-                amount: '($203.07)',
-            }),
-            createTransactionRow({
-                pending: true,
-                description: '08/19 - MAVERIK #683',
-                amount: '($1.90)',
-            }),
-        ]);
-
-        const result = gatherDebitTransactionsInViewSortedByDate();
-        expect(result).toHaveLength(1);
-        expect(result[0]?.description).toBe('WALMART');
+describe('sanitizeDescription', () => {
+    it('removes every comma and trims surrounding whitespace', () => {
+        expect(sanitizeDescription('  AUTOMATIC WITHDRAWAL, PAYPAL, INC WEB (S)\n')).toBe(
+            'AUTOMATIC WITHDRAWAL PAYPAL INC WEB (S)',
+        );
     });
 });
 
-describe('gatherTransactionsByDate', () => {
-    beforeEach(() => {
-        document.body.innerHTML = '';
+describe('toSortedDebits', () => {
+    it('keeps only debits, with amounts flipped to positive, sorted by date', () => {
+        expect(
+            toSortedDebits([
+                transaction('4/12/2025', 'WALMART', -203.07),
+                transaction('4/11/2025', 'TRANSFER', 204),
+                transaction('4/9/2025', 'GOOGLE', -10.73),
+            ]),
+        ).toEqual([
+            transaction('4/9/2025', 'GOOGLE', 10.73),
+            transaction('4/12/2025', 'WALMART', 203.07),
+        ]);
     });
 
-    it('groups debits and credits by date with positive amounts', () => {
-        setupTransactionTable([
-            createTransactionRow({ date: 'Apr 9 2025', description: 'GOOGLE', amount: '($10.73)' }),
-            createTransactionRow({ date: 'Apr 9 2025', description: 'VENMO', amount: '($45.00)' }),
-            createTransactionRow({
-                date: 'Apr 9 2025',
-                description: 'PAYCHECK',
-                amount: '$500.00',
-            }),
-            createTransactionRow({
-                date: 'Apr 12 2025',
-                description: 'WALMART',
-                amount: '($203.07)',
-            }),
+    it('sorts alphabetically by description when dates are equal', () => {
+        const result = toSortedDebits([
+            transaction('4/9/2025', 'VENMO', -45),
+            transaction('4/9/2025', 'GOOGLE', -10.73),
         ]);
+        expect(result.map((t) => t.description)).toEqual(['GOOGLE', 'VENMO']);
+    });
 
-        const result = gatherTransactionsByDate();
-        expect(result).toHaveLength(2);
-        expect(result[0]).toMatchObject({ date: '4/9/2025' });
-        expect(result[0]?.debits).toHaveLength(2);
-        expect(result[0]?.credits).toEqual([
-            { date: '4/9/2025', description: 'PAYCHECK', amount: 500 },
+    it('returns an empty array when there are no debits', () => {
+        expect(toSortedDebits([transaction('4/11/2025', 'TRANSFER', 204)])).toEqual([]);
+    });
+});
+
+describe('groupTransactionsByDate', () => {
+    it('groups debits and credits by date with positive amounts', () => {
+        const result = groupTransactionsByDate([
+            transaction('4/9/2025', 'VENMO', -45),
+            transaction('4/9/2025', 'GOOGLE', -10.73),
+            transaction('4/9/2025', 'PAYCHECK', 500),
+            transaction('4/12/2025', 'WALMART', -203.07),
         ]);
-        expect(result[1]?.debits[0]?.amount).toBe(203.07);
+        expect(result).toEqual([
+            {
+                date: '4/9/2025',
+                debits: [
+                    transaction('4/9/2025', 'GOOGLE', 10.73),
+                    transaction('4/9/2025', 'VENMO', 45),
+                ],
+                credits: [transaction('4/9/2025', 'PAYCHECK', 500)],
+            },
+            {
+                date: '4/12/2025',
+                debits: [transaction('4/12/2025', 'WALMART', 203.07)],
+                credits: [],
+            },
+        ]);
     });
 
     it('sorts groups by date ascending', () => {
-        setupTransactionTable([
-            createTransactionRow({ date: 'Apr 12 2025', amount: '($203.07)' }),
-            createTransactionRow({ date: 'Apr 9 2025', description: 'GOOGLE', amount: '($10.73)' }),
+        const result = groupTransactionsByDate([
+            transaction('4/12/2025', 'WALMART', -203.07),
+            transaction('4/9/2025', 'GOOGLE', -10.73),
         ]);
-        expect(gatherTransactionsByDate().map((d) => d.date)).toEqual(['4/9/2025', '4/12/2025']);
+        expect(result.map((d) => d.date)).toEqual(['4/9/2025', '4/12/2025']);
     });
 
     it('returns an empty array when there are no transactions', () => {
-        setupTransactionTable([]);
-        expect(gatherTransactionsByDate()).toEqual([]);
-    });
-
-    it('excludes pending transactions', () => {
-        setupTransactionTable([
-            createTransactionRow({
-                date: 'Apr 12 2025',
-                description: 'WALMART',
-                amount: '($203.07)',
-            }),
-            createTransactionRow({
-                pending: true,
-                description: '08/19 - MAVERIK #683',
-                amount: '($1.90)',
-            }),
-        ]);
-
-        const result = gatherTransactionsByDate();
-        expect(result).toHaveLength(1);
-        expect(result[0]?.debits).toEqual([
-            { date: '4/12/2025', description: 'WALMART', amount: 203.07 },
-        ]);
+        expect(groupTransactionsByDate([])).toEqual([]);
     });
 });
 
