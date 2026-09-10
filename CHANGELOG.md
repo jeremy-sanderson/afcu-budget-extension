@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.3.0]
 
 ### Changed
 
@@ -146,7 +146,8 @@ Initial tagged release of the pure-JavaScript content script.
 - Sample HTML snapshot of the AFCU page for local testing.
 - `README.md` documentation and spreadsheet usage instructions.
 
-[Unreleased]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v4.2.0...HEAD
+[Unreleased]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v4.3.0...HEAD
+[4.3.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v4.2.0...v4.3.0
 [4.2.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v4.1.0...v4.2.0
 [4.1.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v4.0.0...v4.1.0
 [4.0.0]: https://github.com/jeremy-sanderson/afcu-budget-extension/compare/v3.4.0...v4.0.0
